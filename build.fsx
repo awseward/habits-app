@@ -28,7 +28,7 @@ Target.create "Build" (fun _ ->
 
 Target.create "Run" TODO
 
-Target.create "Bundle" TODO // Would put everything in /deploy
+Target.create "Bundle" TODO
 
 Target.create "Heroku:Container:Push" TODO
 

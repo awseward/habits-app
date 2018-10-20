@@ -359,6 +359,7 @@ ASALocalRun/
 # Begin custom additions
 
 fake.build.lock
+deploy/
 
 # End custom additions
 

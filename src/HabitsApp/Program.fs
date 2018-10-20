@@ -1,7 +1,14 @@
 module Server
 
+open System
 open Saturn
 open Config
+
+let port =
+  try
+    UInt16.Parse (Environment.GetEnvironmentVariable "PORT")
+  with
+  | _ -> 8085us
 
 let endpointPipe = pipeline {
     plug head
@@ -13,7 +20,7 @@ let app = application {
 
     error_handler (fun ex _ -> pipeline { render_html (InternalError.layout ex) })
     use_router Router.appRouter
-    url "http://0.0.0.0:8085/"
+    url (sprintf "http://0.0.0.0:%d/" port)
     memory_cache
     use_static "static"
     use_gzip
