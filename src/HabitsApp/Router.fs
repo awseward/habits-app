@@ -19,7 +19,7 @@ let defaultView = router {
 }
 
 let browserRouter = router {
-    not_found_handler (htmlView NotFound.layout) //Use the default 404 webpage
+    not_found_handler (setStatusCode 404 >=> htmlView NotFound.layout)
     pipe_through browser //Use the default browser pipeline
 
     forward "" defaultView //Use the default view
@@ -33,9 +33,8 @@ let browserRouter = router {
 // }
 
 // let apiRouter = router {
-//     error_handler (text "Api 404")
 //     pipe_through api
-//
+
 //     forward "/someApi" someScopeOrController
 // }
 

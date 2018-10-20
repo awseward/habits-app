@@ -63,7 +63,7 @@ Target.create "Run" (fun _ ->
     openBrowser "http://localhost:8085"
   }
 
-  [ server; browser]
+  [server; browser]
   |> Async.Parallel
   |> Async.RunSynchronously
   |> ignore
@@ -80,8 +80,16 @@ Target.create "Heroku:Container:Push" (fun _ ->
 )
 
 Target.create "Heroku:Container:Release" (fun _ ->
-  runTool "heroku" "container:release web" "."
-  runTool "heroku" "open" "."
+  let release = async { runTool "heroku" "container:release web" "." }
+  let browser = async {
+    do! Async.Sleep 5000
+    runTool "heroku" "open" "."
+  }
+
+  [release; browser]
+  |> Async.Parallel
+  |> Async.RunSynchronously
+  |> ignore
 )
 
 "Clean"
