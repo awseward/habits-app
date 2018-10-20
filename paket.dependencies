@@ -9,7 +9,7 @@ nuget Simple.Migrations
 clitool dotnet-saturn
 
 group Build
-  framework: auto-detect
+  framework: netstandard2.0
   storage none
   source https://api.nuget.org/v3/index.json
   nuget Fake.Core.Target
