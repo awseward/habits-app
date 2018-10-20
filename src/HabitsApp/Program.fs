@@ -18,13 +18,13 @@ let endpointPipe = pipeline {
 let app = application {
     pipe_through endpointPipe
 
-    error_handler (fun ex _ -> pipeline { render_html (InternalError.layout ex) })
+    error_handler (fun ex _ -> pipeline { set_status_code 500; render_html (InternalError.layout ex) })
     use_router Router.appRouter
     url (sprintf "http://0.0.0.0:%d/" port)
     memory_cache
     use_static "static"
     use_gzip
-    use_config (fun _ -> {connectionString = "DataSource=database.sqlite"} ) //TODO: Set development time configuration
+    use_config (fun _ -> { connectionString = "DataSource=database.sqlite" } ) //TODO: Set development time configuration
 }
 
 [<EntryPoint>]

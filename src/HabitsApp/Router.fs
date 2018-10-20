@@ -22,6 +22,7 @@ let browserRouter = router {
     not_found_handler (setStatusCode 404 >=> htmlView NotFound.layout)
     pipe_through browser //Use the default browser pipeline
 
+    forward "/habits" Habits.Controller.resource
     forward "" defaultView //Use the default view
 }
 
