@@ -89,7 +89,7 @@ module Views =
         form [ _action (if isUpdate then Links.withId ctx o.Value.id else Links.index ctx ); _method "post"] [
           if not validationResult.IsEmpty then
             yield validationMessage
-          yield field (fun i -> (string i.id)) "Id" "id"
+          // yield field (fun i -> (string i.id)) "Id" "id"
           yield field (fun i -> (string i.name)) "Name" "name"
           yield buttons
         ]

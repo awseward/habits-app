@@ -27,7 +27,13 @@ module Database =
   let insert connectionString v : Task<Result<int,exn>> =
     task {
       use connection = new SqliteConnection(connectionString)
-      return! execute connection "INSERT INTO Habits(id, name) VALUES (@id, @name)" v
+      let query = @"
+INSERT INTO Habits(id, name)
+  VALUES (
+    (SELECT IFNULL(MAX(id), 0) + 1 FROM Habits),
+    @name
+  )"
+      return! execute connection query v
     }
 
   let delete connectionString id : Task<Result<int,exn>> =

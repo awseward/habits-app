@@ -2,7 +2,7 @@ namespace Habits
 
 [<CLIMutable>]
 type Habit = {
-  id: System.Guid
+  id: int
   name: string
 }
 
@@ -10,7 +10,7 @@ module Validation =
   let validate v =
     Map.empty
     // let validators = [
-    //   fun u -> if isNull u.id then Some ("id", "Id shouldn't be empty") else None
+    //   fun u -> if u.id = 0 then Some ("id", "Id shouldn't be 0") else None
     // ]
 
     // validators

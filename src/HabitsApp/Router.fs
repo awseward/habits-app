@@ -23,6 +23,7 @@ let browserRouter = router {
     pipe_through browser //Use the default browser pipeline
 
     forward "/habits" Habits.Controller.resource
+
     forward "" defaultView //Use the default view
 }
 
