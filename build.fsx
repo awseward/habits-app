@@ -14,23 +14,33 @@ open Fake.IO.Globbing.Operators
 open Fake.Core.TargetOperators
 open System
 
-let TODO _ : unit = failwith "TODO"
-
 let appPath = Path.getFullName "./src/HabitsApp"
 let deployDir = Path.getFullName "./deploy"
 
-let runDotNet cmd workingDir =
-  let result = DotNet.exec (DotNet.Options.withWorkingDirectory workingDir) cmd ""
-  if result.ExitCode <> 0 then failwithf "'dotnet %s' failed in %s" cmd workingDir
-let runTool cmd args workingDir =
-  let result =
-    Process.execSimple (fun info ->
-      { info with
-          FileName = cmd
-          WorkingDirectory = workingDir
-          Arguments = args })
-      TimeSpan.MaxValue
-  if result <> 0 then failwithf "'%s %s' failed" cmd args
+module Util =
+  let runDotNet cmd workingDir =
+    let result = DotNet.exec (DotNet.Options.withWorkingDirectory workingDir) cmd ""
+    if result.ExitCode <> 0 then failwithf "'dotnet %s' failed in %s" cmd workingDir
+  let runTool cmd args workingDir =
+    let result =
+      Process.execSimple (fun info ->
+        { info with
+            FileName = cmd
+            WorkingDirectory = workingDir
+            Arguments = args })
+        TimeSpan.MaxValue
+    if result <> 0 then failwithf "'%s %s' failed" cmd args
+  let openBrowser url =
+    let result =
+      //https://github.com/dotnet/corefx/issues/10361
+      Process.execSimple (fun info ->
+        { info with
+            FileName = url
+            UseShellExecute = true })
+        TimeSpan.MaxValue
+    if result <> 0 then failwithf "opening browser failed"
+
+open Util
 
 Target.create "Clean" (fun _ ->
   !! "src/**/bin"
@@ -44,7 +54,20 @@ Target.create "Build" (fun _ ->
   |> Seq.iter (DotNet.build id)
 )
 
-Target.create "Run" TODO
+Target.create "Run" (fun _ ->
+  let server = async {
+    runDotNet "watch run" appPath
+  }
+  let browser = async {
+    do! Async.Sleep 5000
+    openBrowser "http://localhost:8085"
+  }
+
+  [ server; browser]
+  |> Async.Parallel
+  |> Async.RunSynchronously
+  |> ignore
+)
 
 Target.create "Bundle" (fun _ ->
   let appDeployDir = Path.combine deployDir "HabitsApp"
