@@ -1,9 +1,17 @@
 framework: auto-detect
+source https://api.nuget.org/v3/index.json
+nuget Dapper
+nuget FSharp.Core
+nuget Microsoft.Data.Sqlite
+nuget Saturn
+nuget Simple.Migrations
+
+clitool dotnet-saturn
 
 group Build
   framework: auto-detect
   storage none
   source https://api.nuget.org/v3/index.json
+  nuget Fake.Core.Target
   nuget Fake.DotNet.Cli
   nuget Fake.IO.FileSystem
-  nuget Fake.Core.Target
