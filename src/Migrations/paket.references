@@ -1,4 +1,4 @@
 FSharp.Core
 Simple.Migrations
 
-Microsoft.Data.Sqlite
+Npgsql

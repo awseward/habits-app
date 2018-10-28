@@ -10,6 +10,25 @@ let port =
   with
   | _ -> 8085us
 
+let private DATABASE_URL = Environment.GetEnvironmentVariable "DATABASE_URL"
+let private _connectionString =
+  let uri = (Uri DATABASE_URL)
+  let username, password =
+    match uri.UserInfo.Split (':', StringSplitOptions.RemoveEmptyEntries) with
+    | [|user; pass|] -> user, pass
+    | _ -> failwith "Database url should contain user and pass, but didn't."
+  let host = uri.Host
+  let port = uri.Port
+  let database = uri.AbsolutePath.TrimStart '/'
+
+  sprintf
+    "Host=%s;Port=%i;Username=%s;Password=%s;Database=%s"
+    host
+    port
+    username
+    password
+    database
+
 let endpointPipe = pipeline {
     plug head
     plug requestId
@@ -24,11 +43,11 @@ let app = application {
     memory_cache
     use_static "static"
     use_gzip
-    use_config (fun _ -> { connectionString = "DataSource=database.sqlite" } ) //TODO: Set development time configuration
+    use_config (fun _ -> { connectionString = _connectionString })
 }
 
 [<EntryPoint>]
 let main _ =
     printfn "Working directory - %s" (System.IO.Directory.GetCurrentDirectory())
     run app
-    0 // return an integer exit code
+    0
