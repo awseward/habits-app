@@ -33,7 +33,8 @@ module Controller =
 
   let addAction (ctx: HttpContext) =
     task {
-      return Views.add ctx None Map.empty
+      let input : HabitToCreate = { name = "" }
+      return Views.addCreate ctx input Map.empty
     }
 
   let editAction (ctx: HttpContext) (id : int) =
@@ -51,8 +52,8 @@ module Controller =
 
   let createAction (ctx: HttpContext) =
     task {
-      let! input = Controller.getModel<Habit> ctx
-      let validateResult = Validation.validate input
+      let! input = Controller.getModel<HabitToCreate> ctx
+      let validateResult = Validation.validateCreate input
       if validateResult.IsEmpty then
 
         let cnf = Controller.getConfig ctx
@@ -63,13 +64,13 @@ module Controller =
         | Error ex ->
           return raise ex
       else
-        return! Controller.renderHtml ctx (Views.add ctx (Some input) validateResult)
+        return! Controller.renderHtml ctx (Views.addCreate ctx input validateResult)
     }
 
   let updateAction (ctx: HttpContext) (id : int) =
     task {
       let! input = Controller.getModel<Habit> ctx
-      let validateResult = Validation.validate input
+      let validateResult = Validation.validateUpdate input
       if validateResult.IsEmpty then
         let cnf = Controller.getConfig ctx
         let! result = Database.update cnf.connectionString input
