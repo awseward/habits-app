@@ -7,7 +7,7 @@ let layout (content: XmlNode list) =
         head [] [
             meta [_charset "utf-8"]
             meta [_name "viewport"; _content "width=device-width, initial-scale=1" ]
-            title [] [encodedText "Hello SaturnSample"]
+            title [] [encodedText "Hello HabitsApp"]
             link [_rel "stylesheet"; _href "/app.css" ]
         ]
 
