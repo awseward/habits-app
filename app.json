@@ -6,14 +6,16 @@
   },
   "formation": {
     "migrations": {
-      "quantity": 1
+      "quantity": 1,
+      "size": "free"
     },
     "web": {
-      "quantity": 1
+      "quantity": 1,
+      "size": "free"
     }
   },
   "addons": [
-    "heroku-postgresql"
+    "heroku-postgresql:hobby-dev"
   ],
   "buildpacks": [
 
