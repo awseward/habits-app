@@ -4,7 +4,6 @@ source https://api.nuget.org/v3/index.json
 nuget Dapper
 nuget FSharp.Core
 nuget Giraffe 1.1
-nuget Microsoft.Data.Sqlite
 nuget Npgsql
 nuget Saturn
 nuget Simple.Migrations
