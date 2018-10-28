@@ -125,10 +125,7 @@ module Views =
     ]
     App.layout ([section [_class "section"] cnt])
 
-  let add (ctx: HttpContext) (habit: Habit) (validationResult : Map<string, string>) =
-    editForm ctx habit validationResult
-
-  let addCreate (ctx: HttpContext) (habit: HabitToCreate) (validationResult: Map<string, string>) =
+  let add (ctx: HttpContext) (habit: HabitToCreate) (validationResult: Map<string, string>) =
     createForm ctx habit validationResult
 
   let edit (ctx: HttpContext) (habit: Habit) (validationResult : Map<string, string>) =

@@ -33,8 +33,7 @@ module Controller =
 
   let addAction (ctx: HttpContext) =
     task {
-      let input : HabitToCreate = { name = "" }
-      return Views.addCreate ctx input Map.empty
+      return Views.add ctx { HabitToCreate.name = "" } Map.empty
     }
 
   let editAction (ctx: HttpContext) (id : int) =
@@ -52,35 +51,35 @@ module Controller =
 
   let createAction (ctx: HttpContext) =
     task {
-      let! input = Controller.getModel<HabitToCreate> ctx
-      let validateResult = Validation.validateCreate input
+      let! habitToCreate = Controller.getModel<HabitToCreate> ctx
+      let validateResult = Validation.validateCreate habitToCreate
       if validateResult.IsEmpty then
 
         let cnf = Controller.getConfig ctx
-        let! result = Database.insert cnf.connectionString input
+        let! result = Database.insert cnf.connectionString habitToCreate
         match result with
         | Ok _ ->
           return! Controller.redirect ctx (Links.index ctx)
         | Error ex ->
           return raise ex
       else
-        return! Controller.renderHtml ctx (Views.addCreate ctx input validateResult)
+        return! Controller.renderHtml ctx (Views.add ctx habitToCreate validateResult)
     }
 
   let updateAction (ctx: HttpContext) (id : int) =
     task {
-      let! input = Controller.getModel<Habit> ctx
-      let validateResult = Validation.validateUpdate input
+      let! habit = Controller.getModel<Habit> ctx
+      let validateResult = Validation.validateUpdate habit
       if validateResult.IsEmpty then
         let cnf = Controller.getConfig ctx
-        let! result = Database.update cnf.connectionString input
+        let! result = Database.update cnf.connectionString habit
         match result with
         | Ok _ ->
           return! Controller.redirect ctx (Links.index ctx)
         | Error ex ->
           return raise ex
       else
-        return! Controller.renderHtml ctx (Views.edit ctx input validateResult)
+        return! Controller.renderHtml ctx (Views.edit ctx habit validateResult)
     }
 
   let deleteAction (ctx: HttpContext) (id : int) =
