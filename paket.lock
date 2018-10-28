@@ -962,6 +962,7 @@ NUGET
       System.ValueTuple (>= 4.4)
 
 GROUP Build
+STORAGE: NONE
 RESTRICTION: == netstandard2.0
 NUGET
   remote: https://api.nuget.org/v3/index.json
