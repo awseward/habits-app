@@ -1,0 +1,21 @@
+{
+  "name": "habits-app",
+  "scripts": {
+  },
+  "env": {
+  },
+  "formation": {
+    "migrations": {
+      "quantity": 1
+    },
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": [
+    "heroku-postgresql"
+  ],
+  "buildpacks": [
+
+  ]
+}
