@@ -12,9 +12,10 @@ clitool dotnet-saturn
 
 group Build
   framework: netstandard2.0
-  storage none
   source https://api.nuget.org/v3/index.json
+  storage none
 
+  nuget ASeward.MiscTools
   nuget Fake.Core.Target
   nuget Fake.DotNet.Cli
   nuget Fake.IO.FileSystem

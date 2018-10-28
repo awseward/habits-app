@@ -950,6 +950,10 @@ STORAGE: NONE
 RESTRICTION: == netstandard2.0
 NUGET
   remote: https://api.nuget.org/v3/index.json
+    ASeward.MiscTools (0.1)
+      FSharp.Core (>= 4.2.3)
+      Newtonsoft.Json (>= 11.0)
+      System.ValueTuple (>= 4.4.0-prerelease <= 4.4)
     BlackFox.VsWhere (0.3.1)
       FSharp.Core (>= 4.2.3)
     Fake.Core.CommandLineParsing (5.9.3)
@@ -1509,3 +1513,4 @@ NUGET
     System.Threading.ThreadPool (4.3)
       System.Runtime (>= 4.3)
       System.Runtime.Handles (>= 4.3)
+    System.ValueTuple (4.4)
