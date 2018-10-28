@@ -1,15 +1,14 @@
 #r "paket: groupref build //"
 #load "./.fake/build.fsx/intellisense.fsx"
-
 #if !FAKE
   #r "netstandard"
   #r "Facades/netstandard" // https://github.com/ionide/ionide-vscode-fsharp/issues/839#issuecomment-396296095
 #endif
 
+open ASeward.MiscTools
 open Fake.Core
 open Fake.DotNet
 open Fake.IO
-open Fake.IO.FileSystemOperators
 open Fake.IO.Globbing.Operators
 open Fake.Core.TargetOperators
 open System

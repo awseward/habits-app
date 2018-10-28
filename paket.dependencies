@@ -1,5 +1,6 @@
 framework: auto-detect
 source https://api.nuget.org/v3/index.json
+
 nuget Dapper
 nuget FSharp.Core
 nuget Microsoft.Data.Sqlite
@@ -10,8 +11,10 @@ clitool dotnet-saturn
 
 group Build
   framework: netstandard2.0
-  storage none
   source https://api.nuget.org/v3/index.json
+  storage none
+
+  nuget ASeward.MiscTools
   nuget Fake.Core.Target
   nuget Fake.DotNet.Cli
   nuget Fake.IO.FileSystem
