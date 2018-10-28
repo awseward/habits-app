@@ -14,12 +14,14 @@ open Fake.Core.TargetOperators
 open System
 
 let appPath = Path.getFullName "./src/HabitsApp"
+let migrationPath = Path.getFullName "./src/Migrations"
 let deployDir = Path.getFullName "./deploy"
 
 module Util =
   let runDotNet cmd workingDir =
     let result = DotNet.exec (DotNet.Options.withWorkingDirectory workingDir) cmd ""
     if result.ExitCode <> 0 then failwithf "'dotnet %s' failed in %s" cmd workingDir
+
   let runTool cmd args workingDir =
     let result =
       Process.execSimple (fun info ->
@@ -29,6 +31,7 @@ module Util =
             Arguments = args })
         TimeSpan.MaxValue
     if result <> 0 then failwithf "'%s %s' failed" cmd args
+
   let openBrowser url =
     let result =
       //https://github.com/dotnet/corefx/issues/10361
@@ -74,6 +77,12 @@ Target.create "Bundle" (fun _ ->
   runDotNet (sprintf "publish -c Release -o \"%s\"" appDeployDir) appPath
 )
 
+Target.create "Bundle:Migrations" (fun _ ->
+  let migrationDeployDir = Path.combine deployDir "Migrations"
+
+  runDotNet (sprintf "publish -c Release -o \"%s\"" migrationDeployDir ) migrationPath
+)
+
 Target.create "Heroku:Container:Push" (fun _ ->
   runTool "heroku" "container:push web --recursive" "."
 )
@@ -96,5 +105,9 @@ Target.create "Heroku:Container:Release" (fun _ ->
   ==> "Bundle"
   ==> "Heroku:Container:Push"
   ==> "Heroku:Container:Release"
+
+"Clean"
+  ==> "Build"
+  ==> "Bundle:Migrations"
 
 Target.runOrList ()
