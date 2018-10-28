@@ -10,8 +10,24 @@ let port =
   with
   | _ -> 8085us
 
+let private DATABASE_URL = Environment.GetEnvironmentVariable "DATABASE_URL"
 let private _connectionString =
-  "DataSource=database.sqlite" // FIXME
+  let uri = (Uri DATABASE_URL)
+  let username, password =
+    match uri.UserInfo.Split (':', StringSplitOptions.RemoveEmptyEntries) with
+    | [|user; pass|] -> user, pass
+    | _ -> failwith "Database url should contain user and pass, but didn't."
+  let host = uri.Host
+  let port = uri.Port
+  let database = uri.AbsolutePath.TrimStart '/'
+
+  sprintf
+    "Host=%s;Port=%i;Username=%s;Password=%s;Database=%s"
+    host
+    port
+    username
+    password
+    database
 
 let endpointPipe = pipeline {
     plug head
@@ -21,7 +37,7 @@ let endpointPipe = pipeline {
 let app = application {
     pipe_through endpointPipe
 
-    error_handler (fun ex _ -> pipeline { render_html (InternalError.layout ex) })
+    error_handler (fun ex _ -> pipeline { set_status_code 500; render_html (InternalError.layout ex) })
     use_router Router.appRouter
     url (sprintf "http://0.0.0.0:%d/" port)
     memory_cache
