@@ -33,7 +33,7 @@ module Controller =
 
   let addAction (ctx: HttpContext) =
     task {
-      return Views.add ctx { HabitToCreate.name = "" } Map.empty
+      return Views.add ctx (HabitToCreate.GetEmpty()) Map.empty
     }
 
   let editAction (ctx: HttpContext) (id : int) =
