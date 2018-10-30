@@ -80,11 +80,12 @@ module Views =
     ]
 
   let private createForm (ctx: HttpContext) (habit: HabitToCreate) (validationResult: Map<string, string>) =
-    let field selector lbl key =
+    let field selector lbl key inputReadOnly (moreStuff: XmlNode list) =
       div [_class "field"] [
         yield label [_class "label"] [rawText (string lbl)]
         yield div [_class "control has-icons-right"] [
-          yield input [_class (if validationResult.ContainsKey key then "input is-danger" else "input"); _value (selector habit); _name key ; _type "text" ]
+          yield input [_class (if validationResult.ContainsKey key then "input is-danger" else "input"); _value (selector habit); _name key ; _type "text"; (if inputReadOnly then _readonly else attr "" "")]
+          yield span [] moreStuff
           if validationResult.ContainsKey key then
             yield span [_class "icon is-small is-right"] [
               i [_class "fas fa-exclamation-triangle"] []
@@ -99,8 +100,10 @@ module Views =
         form [ _action formActions; _method "post"] [
           if not validationResult.IsEmpty then
             yield _oopsDiv
-          yield field (fun i -> (string i.name)) "Name" "name"
-          yield field (fun i -> (_whenOrNull i.last_done_at)) "Last Done" "last_done_at"
+          yield field (fun i -> (string i.name)) "Name" "name" false []
+          yield field (fun i -> (_whenOrNull i.last_done_at)) "Last Done" "last_done_at" true [
+            button [_id "set_last_done_now_button"; _type "button"] [rawText "Set as now"]
+          ]
           yield _buttons ctx
         ]
       ]
@@ -108,11 +111,12 @@ module Views =
     App.layout ([section [_class "section"] cnt])
 
   let private editForm (ctx: HttpContext) (habit: Habit) (validationResult: Map<string, string>) =
-    let field selector lbl key =
+    let field selector lbl key inputReadOnly (moreStuff: XmlNode list) =
       div [_class "field"] [
         yield label [_class "label"] [rawText (string lbl)]
         yield div [_class "control has-icons-right"] [
-          yield input [_class (if validationResult.ContainsKey key then "input is-danger" else "input"); _value (selector habit); _name key ; _type "text" ]
+          yield input [_class (if validationResult.ContainsKey key then "input is-danger" else "input"); _value (selector habit); _name key ; _type "text"; (if inputReadOnly then _readonly else attr "" "")]
+          yield span [] moreStuff
           if validationResult.ContainsKey key then
             yield span [_class "icon is-small is-right"] [
               i [_class "fas fa-exclamation-triangle"] []
@@ -129,8 +133,10 @@ module Views =
             yield _oopsDiv
           yield (p [] [(rawText (string habit.id))])
           yield input [_type "hidden"; _name "id"; _value (string habit.id)]
-          yield field (fun i -> (string i.name)) "Name" "name"
-          yield field (fun i -> (_whenOrNull i.last_done_at)) "Last Done" "last_done_at"
+          yield field (fun i -> (string i.name)) "Name" "name" false []
+          yield field (fun i -> (_whenOrNull i.last_done_at)) "Last Done" "last_done_at" true [
+            button [_id "set_last_done_now_button"; _type "button"] [rawText "Set as now"]
+          ]
           yield _buttons ctx
         ]
       ]
