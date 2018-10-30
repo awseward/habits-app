@@ -1,3 +1,5 @@
+open Fake.Core
+open Fake.Core
 #r "paket: groupref build //"
 #load "./.fake/build.fsx/intellisense.fsx"
 #if !FAKE
@@ -6,7 +8,7 @@
 #endif
 
 open ASeward.MiscTools
-open Fake.Core
+open ASeward.MiscTools.ActivePatterns
 open Fake.DotNet
 open Fake.IO
 open Fake.IO.Globbing.Operators
@@ -16,6 +18,29 @@ open System
 let appPath = Path.getFullName "./src/HabitsApp"
 let migrationPath = Path.getFullName "./src/Migrations"
 let deployDir = Path.getFullName "./deploy"
+
+let private _getOrPromptAndSetRequiredEnvar name =
+  let rec promptIfNecessaryUntilProvided =
+    function
+    | Some str -> str
+    | None ->
+        Trace.traceImportantfn "Missing env var '%s'" name
+        Trace.tracef "Please provide a value now: "
+        Console.ReadLine ()
+        |> function
+            | NullOrWhiteSpace -> promptIfNecessaryUntilProvided None
+            | str -> str
+
+  let value =
+    name
+    |> Environment.environVar
+    |> Option.ofString
+    |> promptIfNecessaryUntilProvided
+
+  // Will be unnecessary in some cases but oh well for now
+  Environment.setEnvironVar name value
+
+  value
 
 module Util =
   let runDotNet cmd workingDir =
@@ -71,7 +96,7 @@ Target.create "Run" (fun _ ->
   |> ignore
 )
 
-Target.create "Bundle" (fun _ ->
+Target.create "Bundle:Web" (fun _ ->
   let appDeployDir = Path.combine deployDir "HabitsApp"
 
   runDotNet (sprintf "publish -c Release -o \"%s\"" appDeployDir) appPath
@@ -83,31 +108,32 @@ Target.create "Bundle:Migrations" (fun _ ->
   runDotNet (sprintf "publish -c Release -o \"%s\"" migrationDeployDir ) migrationPath
 )
 
-Target.create "Heroku:Container:Push" (fun _ ->
-  runTool "heroku" "container:push web --recursive" "."
+Target.create "Heroku:Web" (fun _ ->
+  let remote = _getOrPromptAndSetRequiredEnvar "HEROKU_REMOTE"
+  let heroku args = runTool "heroku" (sprintf "%s --remote=%s" args remote) "."
+
+  heroku "container:push web --recursive"
+  heroku "container:release web"
+  heroku "open"
 )
 
-Target.create "Heroku:Container:Release" (fun _ ->
-  let release = async { runTool "heroku" "container:release web" "." }
-  let browser = async {
-    do! Async.Sleep 5000
-    runTool "heroku" "open" "."
-  }
+Target.create "Heroku:Migrations" (fun _ ->
+  let remote = _getOrPromptAndSetRequiredEnvar "HEROKU_REMOTE"
+  let heroku args = runTool "heroku" (sprintf "%s --remote=%s" args remote) "."
 
-  [release; browser]
-  |> Async.Parallel
-  |> Async.RunSynchronously
-  |> ignore
+  heroku "container:push migrations --recursive"
+  heroku "container:release migrations"
+  heroku "run \"dotnet Migrations.dll\" --type=migrations"
 )
 
 "Clean"
   ==> "Build"
-  ==> "Bundle"
-  ==> "Heroku:Container:Push"
-  ==> "Heroku:Container:Release"
+  ==> "Bundle:Web"
+  ==> "Heroku:Web"
 
 "Clean"
   ==> "Build"
   ==> "Bundle:Migrations"
+  ==> "Heroku:Migrations"
 
 Target.runOrList ()
