@@ -12,6 +12,13 @@ module Views =
     | None -> defaultValue
   let private _whenOrNever = _whenOr "Never"
   let private _whenOrNull = _whenOr null
+  let private sortHabitsLeastByRecencyAscending (habits: Habit list) =
+    habits
+    |> List.sortBy (fun h ->
+        match h.last_done_at with
+        | Some dto -> dto
+        | None -> DateTimeOffset.MinValue
+    )
 
   let index (ctx : HttpContext) (objs : Habit list) =
     let cnt = [
@@ -21,18 +28,16 @@ module Views =
         table [_class "table is-hoverable is-fullwidth"] [
           thead [] [
             tr [] [
-              th [] [rawText "Id"]
               th [] [rawText "Name"]
               th [] [rawText "Last Done"]
               th [] []
             ]
           ]
           tbody [] [
-            for o in objs do
+            for o in (sortHabitsLeastByRecencyAscending objs) do
               yield tr [] [
-                td [] [rawText (string o.id)]
                 td [] [rawText (string o.name)]
-                td [] [rawText (_whenOrNever o.last_done_at)]
+                td [_class "datetime_cell"] [rawText (_whenOrNever o.last_done_at)]
                 td [] [
                   a [_class "button is-text"; _href (Links.withId ctx o.id )] [rawText "Show"]
                   a [_class "button is-text"; _href (Links.edit ctx o.id )] [rawText "Edit"]
@@ -53,7 +58,6 @@ module Views =
         h2 [ _class "title"] [rawText "Show Habit"]
 
         ul [] [
-          li [] [ strong [] [rawText "Id: "]; rawText (string o.id) ]
           li [] [ strong [] [rawText "Name: "]; rawText (string o.name) ]
           li [] [ strong [] [rawText "Last Done: "]; rawText (_whenOrNever o.last_done_at) ]
         ]
@@ -131,9 +135,9 @@ module Views =
         form [ _action formActions; _method "post"] [
           if not validationResult.IsEmpty then
             yield _oopsDiv
-          yield (p [] [(rawText (string habit.id))])
+          yield p [] [rawText habit.name]
           yield input [_type "hidden"; _name "id"; _value (string habit.id)]
-          yield field (fun i -> (string i.name)) "Name" "name" false []
+          yield input [_type "hidden"; _name "name"; _value (string habit.name)]
           yield field (fun i -> (_whenOrNull i.last_done_at)) "Last Done" "last_done_at" true [
             button [_id "set_last_done_now_button"; _type "button"] [rawText "Set as now"]
           ]
