@@ -23,3 +23,7 @@ a.button.is-text {
 input.input {
   width: 200px;
 }
+
+td.datetime_cell {
+  width: 225px;
+}
