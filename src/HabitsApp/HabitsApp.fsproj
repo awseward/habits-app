@@ -6,16 +6,15 @@
   <ItemGroup>
     <Compile Include="Database.fs" />
     <Compile Include="Config.fs" />
-
     <Compile Include="Templates/App.fs" />
     <Compile Include="Templates/Index.fs" />
     <Compile Include="Templates/NotFound.fs" />
     <Compile Include="Templates/InternalError.fs" />
-
-    <Compile Include="Habits\HabitsModel.fs" />
-    <Compile Include="Habits\HabitsViews.fs" />
-    <Compile Include="Habits\HabitsRepository.fs" />
-    <Compile Include="Habits\HabitsController.fs" />
+    <Compile Include="Habits/HabitsModel.fs" />
+    <Compile Include="Habits/HabitsViews.fs" />
+    <Compile Include="Habits/HabitsRepository.fs" />
+    <Compile Include="Habits/HabitsController.fs" />
+    <Compile Include="Envars.fs" />
     <Compile Include="Router.fs" />
     <Compile Include="Program.fs" />
     <Content Include="static/*.*">

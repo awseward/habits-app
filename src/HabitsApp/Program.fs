@@ -3,6 +3,7 @@ module Server
 open System
 open Saturn
 open Config
+open Habits
 
 let port =
   try
@@ -10,9 +11,9 @@ let port =
   with
   | _ -> 8085us
 
-let private DATABASE_URL = Environment.GetEnvironmentVariable "DATABASE_URL"
 let private _connectionString =
-  let uri = (Uri DATABASE_URL)
+  let uri = Uri <| Envars.getDatabaseUrl()
+
   let username, password =
     match uri.UserInfo.Split (':', StringSplitOptions.RemoveEmptyEntries) with
     | [|user; pass|] -> user, pass
@@ -51,5 +52,6 @@ let app = application {
 [<EntryPoint>]
 let main _ =
     printfn "Working directory - %s" (System.IO.Directory.GetCurrentDirectory())
+    Dapper.SqlMapper.AddTypeHandler (NullableDateTimeOffsetHandler())
     run app
     0
