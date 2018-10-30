@@ -12,8 +12,6 @@ type NullableDateTimeOffsetHandler () =
   inherit SqlMapper.TypeHandler<DateTimeOffset option> ()
 
   override __.Parse value =
-    printfn "Parse ()"
-    printfn "%A" value
     match value with
     | null -> None
     | :? DateTime as dt ->
@@ -25,12 +23,11 @@ type NullableDateTimeOffsetHandler () =
         eprintfn "WARNING: Unsure how to convert object to DateTimeOffset: %A" x
         None
 
-
-  override __.SetValue (dbDataParameter, value) =
+  override __.SetValue (parameter, value) =
     match value with
     | Some v -> (Nullable<DateTimeOffset> v)
     | None -> Nullable<DateTimeOffset>()
-    |> fun nullable -> dbDataParameter.Value <- nullable
+    |> fun nullable -> parameter.Value <- nullable
 
 module Database =
   let getAll connectionString : Task<Result<Habit seq, exn>> =
@@ -54,7 +51,7 @@ module Database =
   let insert connectionString v : Task<Result<int,exn>> =
     task {
       use connection = new NpgsqlConnection(connectionString)
-      let query = "INSERT INTO Habits(name, last_done_at) VALUES (@name, NULL)"
+      let query = "INSERT INTO Habits(name, last_done_at) VALUES (@name, @last_done_at)"
       return! execute connection query v
     }
 

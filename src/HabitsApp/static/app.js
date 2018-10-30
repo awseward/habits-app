@@ -40,7 +40,19 @@ function addDeleteButtons () {
   }
 }
 
+function setLastDoneAsNow() {
+  document.getElementsByName('last_done_at')[0].value = new Date().toISOString();
+}
+
+function addOnclickToSetLastDoneAsNowButtonIfPresent() {
+  var button = document.getElementById('set_last_done_now_button');
+  if (button !== null) {
+    button.onclick = setLastDoneAsNow;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   addNavbarBurger();
   addDeleteButtons();
+  addOnclickToSetLastDoneAsNowButtonIfPresent();
 });
