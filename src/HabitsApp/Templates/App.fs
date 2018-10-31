@@ -10,10 +10,11 @@ let layout (content: XmlNode list) =
             title [] [encodedText "Hello HabitsApp"]
             link [_rel "stylesheet"; _href "/app.css" ]
             script [_src "https://cdnjs.cloudflare.com/ajax/libs/turbolinks/5.1.1/turbolinks.js"] []
+            script [_defer; _src "/app.js"] []
         ]
 
         body [] [
+            yield h1 [] [rawText "Habits"]
             yield! content
-            yield script [_src "/app.js"] []
         ]
     ]

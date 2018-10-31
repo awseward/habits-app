@@ -20,32 +20,31 @@ module Views =
         | None -> DateTimeOffset.MinValue
     )
 
-  let index (ctx : HttpContext) (objs : Habit list) =
-    let cnt = [
-      div [_class "container "] [
-        yield h2 [_class "title"] [rawText "Habits"]
-
-        for o in (sortHabitsLeastByRecencyAscending objs) do
-          yield div [_class "card-container"] [
-            yield span [_class "card-title"] [rawText o.name]
-            yield p [] [rawText (_whenOrNever o.last_done_at)]
-            yield span [_class "card-links"] [
-              a [_class "button is-text"; _href (Links.withId ctx o.id )] [rawText "Show"]
-              a [_class "button is-text"; _href (Links.edit ctx o.id )] [rawText "Edit"]
-              a [_class "button is-text is-delete"; attr "data-href" (Links.withId ctx o.id ) ] [rawText "Delete"]
-            ]
+  let index (ctx : HttpContext) (habits : Habit list) =
+    App.layout [
+      section [_class "section"] [
+        div [_class "container "] [
+          yield div [_class "overflow-hidden"] [
+            a [_class "button is-text new-habit-button"; _href (Links.add ctx )] [rawText "New Habit"]
           ]
 
-        yield a [_class "button is-text"; _href (Links.add ctx )] [rawText "New Habit"]
+          for habit in (sortHabitsLeastByRecencyAscending habits) do
+            yield div [_class "card-container overflow-hidden"] [
+              yield span [_class "card-title"] [rawText habit.name]
+              yield p [] [rawText (_whenOrNever habit.last_done_at)]
+              yield span [_class "card-links"] [
+                a [_class "button is-text"; _href (Links.withId ctx habit.id )] [rawText "Show"]
+                a [_class "button is-text"; _href (Links.edit ctx habit.id )] [rawText "Edit"]
+                a [_class "button is-text is-delete"; attr "data-href" (Links.withId ctx habit.id ) ] [rawText "Delete"]
+              ]
+            ]
+        ]
       ]
     ]
-    App.layout ([section [_class "section"] cnt])
 
   let show (ctx : HttpContext) (o : Habit) =
     let cnt = [
       div [_class "container "] [
-        h2 [ _class "title"] [rawText "Show Habit"]
-
         ul [] [
           li [] [ strong [] [rawText "Name: "]; rawText (string o.name) ]
           li [] [ strong [] [rawText "Last Done: "]; rawText (_whenOrNever o.last_done_at) ]
