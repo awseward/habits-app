@@ -47,6 +47,7 @@ let app = application {
     use_static "static"
     use_gzip
     use_config (fun _ -> { connectionString = _connectionString })
+    use_turbolinks
 }
 
 [<EntryPoint>]

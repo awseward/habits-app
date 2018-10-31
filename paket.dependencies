@@ -6,6 +6,7 @@ nuget FSharp.Core
 nuget Giraffe 1.1
 nuget Npgsql
 nuget Saturn
+nuget Saturn.Extensions.Turbolinks
 nuget Simple.Migrations
 
 clitool dotnet-saturn
