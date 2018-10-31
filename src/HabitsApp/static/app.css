@@ -46,3 +46,12 @@ div.card-container {
 div.card-container p {
   font-size: 14px;
 }
+
+html[data-turbolinks-preview] body * {
+  opacity: 0.8;
+}
+
+.turbolinks-progress-bar {
+  height: 10px;
+  background-color: rgba(105, 250, 206, 0.8);
+}
