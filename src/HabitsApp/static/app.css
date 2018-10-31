@@ -27,3 +27,22 @@ input.input {
 td.datetime_cell {
   width: 225px;
 }
+
+span.card-title {
+  font-size: 22px;
+}
+
+span.card-links {
+  float: right;
+}
+
+div.card-container {
+  background-color: #f0f0f0;
+  padding: 10px 20px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+div.card-container p {
+  font-size: 14px;
+}

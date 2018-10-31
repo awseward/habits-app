@@ -23,31 +23,20 @@ module Views =
   let index (ctx : HttpContext) (objs : Habit list) =
     let cnt = [
       div [_class "container "] [
-        h2 [ _class "title"] [rawText "Listing Habits"]
+        yield h2 [_class "title"] [rawText "Habits"]
 
-        table [_class "table is-hoverable is-fullwidth"] [
-          thead [] [
-            tr [] [
-              th [] [rawText "Name"]
-              th [] [rawText "Last Done"]
-              th [] []
+        for o in (sortHabitsLeastByRecencyAscending objs) do
+          yield div [_class "card-container"] [
+            yield span [_class "card-title"] [rawText o.name]
+            yield p [] [rawText (_whenOrNever o.last_done_at)]
+            yield span [_class "card-links"] [
+              a [_class "button is-text"; _href (Links.withId ctx o.id )] [rawText "Show"]
+              a [_class "button is-text"; _href (Links.edit ctx o.id )] [rawText "Edit"]
+              a [_class "button is-text is-delete"; attr "data-href" (Links.withId ctx o.id ) ] [rawText "Delete"]
             ]
           ]
-          tbody [] [
-            for o in (sortHabitsLeastByRecencyAscending objs) do
-              yield tr [] [
-                td [] [rawText (string o.name)]
-                td [_class "datetime_cell"] [rawText (_whenOrNever o.last_done_at)]
-                td [] [
-                  a [_class "button is-text"; _href (Links.withId ctx o.id )] [rawText "Show"]
-                  a [_class "button is-text"; _href (Links.edit ctx o.id )] [rawText "Edit"]
-                  a [_class "button is-text is-delete"; attr "data-href" (Links.withId ctx o.id ) ] [rawText "Delete"]
-                ]
-              ]
-          ]
-        ]
 
-        a [_class "button is-text"; _href (Links.add ctx )] [rawText "New Habit"]
+        yield a [_class "button is-text"; _href (Links.add ctx )] [rawText "New Habit"]
       ]
     ]
     App.layout ([section [_class "section"] cnt])
