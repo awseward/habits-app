@@ -6,6 +6,33 @@ open Saturn
 open System
 
 module Views =
+
+  module Dots =
+    let aDot (red: byte, green: byte, blue: byte) =
+      div [_class "dot-container-containr"] [
+        div [_class "dot-container"] [
+          div [_class "dot-outer"] [
+            div [_class "dot-inner"; _style (sprintf "background-color: rgba(%d, %d, %d, 1.0)" red green blue)] []
+          ]
+        ]
+      ]
+
+    let examples =
+      let ramp = seq { 0uy .. 255uy }
+      let flat = 255uy |> Seq.replicate 255
+      let RGBs =
+        flat
+        |> Seq.append ramp
+        |> fun full -> Seq.zip full (Seq.rev full)
+        |> Seq.map (fun (red, green) -> (red, green, 0uy))
+        |> Seq.chunkBySize 5
+        |> Seq.skip 1
+        |> Seq.take 100
+        |> Seq.map Array.head
+
+      RGBs
+      |> Seq.map aDot
+
   let private _whenOr (defaultValue: string) (value: DateTimeOffset option) =
     match value with
     | Some dto -> (string dto)
@@ -23,7 +50,7 @@ module Views =
   let index (ctx : HttpContext) (habits : Habit list) =
     App.layout [
       section [_class "section"] [
-        div [_class "container "] [
+        yield div [_class "container "] [
           yield div [_class "overflow-hidden"] [
             a [_class "button is-text new-habit-button"; _href (Links.add ctx )] [rawText "New Habit"]
           ]
@@ -39,6 +66,8 @@ module Views =
               ]
             ]
         ]
+
+        yield! Dots.examples
       ]
     ]
 
