@@ -16,15 +16,21 @@ let defaultView = router {
     get "/" (htmlView Index.layout)
     get "/index.html" (redirectTo false "/")
     get "/default.html" (redirectTo false "/")
+    get "/github_oauth_callback" (redirectTo false "/habits")
+}
+
+let loggedInView = router {
+  pipe_through User.loggedIn
+
+  forward "" Habits.Controller.resource
 }
 
 let browserRouter = router {
     not_found_handler (setStatusCode 404 >=> htmlView NotFound.layout)
-    pipe_through browser //Use the default browser pipeline
+    pipe_through browser
 
-    forward "/habits" Habits.Controller.resource
-
-    forward "" defaultView //Use the default view
+    forward "" defaultView
+    forward "/habits" loggedInView
 }
 
 //Other scopes may use different pipelines and error handlers

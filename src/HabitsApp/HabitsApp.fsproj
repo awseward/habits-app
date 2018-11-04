@@ -16,6 +16,7 @@
     <Compile Include="Habits/HabitsRepository.fs" />
     <Compile Include="Habits/HabitsController.fs" />
     <Compile Include="Envars.fs" />
+    <Compile Include="User.fs" />
     <Compile Include="Router.fs" />
     <Compile Include="Program.fs" />
     <Content Include="static/*.*">

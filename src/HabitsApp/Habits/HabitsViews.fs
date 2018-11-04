@@ -48,6 +48,9 @@ module Views =
     )
 
   let index (ctx : HttpContext) (habits : Habit list) =
+    printfn "!!!! claims: %A" ctx.User.Claims
+    printfn "!!!! identity.AuthenticationType: %A" ctx.User.Identity.AuthenticationType
+    printfn "!!!! identity.Name: %A" ctx.User.Identity.Name
     App.layout [
       section [_class "section"] [
         yield div [_class "container "] [
