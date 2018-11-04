@@ -7,37 +7,31 @@ open System
 
 module Views =
 
-  module Dots =
-    let aDot (red: byte, green: byte, blue: byte) =
-      div [_class "dot-container-container"] [
-        div [_class "dot-container"] [
-          div [_class "dot-outer"; _style (sprintf "background-color: rgba(%d, %d, %d, 0.75)" red green blue)] []
-        ]
-      ]
-
-    let examples =
-      let ramp = seq { 0uy .. 255uy }
-      let flat = 255uy |> Seq.replicate 255
-      flat
-      |> Seq.append ramp
-      |> fun full -> Seq.zip full (Seq.rev full)
-      |> Seq.map (fun (red, green) -> (red, green, 0uy))
-      |> Seq.chunkBySize 5
-      |> Seq.skip 1
-      |> Seq.take 100
-      |> Seq.map (Array.head >> aDot)
-      |> Seq.rev
-      |> Seq.toList
-
-    let forScore (min: DateTimeOffset) (max: DateTimeOffset) (value: DateTimeOffset option) =
-      let getScore = LastDoneScore.getScoringTransform min max
+  module HealthDots =
+    let forDateTimeOffset (min: DateTimeOffset) (max: DateTimeOffset) (value: DateTimeOffset option) =
+      let getScore = Health.scoreDateTimeOffset min max
+      let redDot = Health.redToGreenDots |> List.head
 
       match value with
-      | None -> aDot (220uy, 220uy, 220uy)
+      | None -> redDot
       | Some dtOffset ->
           dtOffset
           |> getScore
-          |> fun score -> printfn "!!!!!!!! score: %d" score; List.item score examples
+          |> fun score -> List.item score Health.redToGreenDots
+
+    let forHabit (sortedHabits: Habit list):  (Habit -> XmlNode) =
+      let freshest = DateTimeOffset.Now
+      let stalest =
+        sortedHabits
+        |> List.map (fun h -> h.last_done_at)
+        |> List.filter Option.isSome
+        |> function
+            | (Some dtOffset)::_ -> dtOffset
+            | _ -> freshest
+
+      (fun h -> forDateTimeOffset stalest freshest h.last_done_at)
+
+    let enabled = true // FIXME: Make this user-configurable
 
   let private _whenOr (defaultValue: string) (value: DateTimeOffset option) =
     match value with
@@ -45,7 +39,7 @@ module Views =
     | None -> defaultValue
   let private _whenOrNever = _whenOr "Never"
   let private _whenOrNull = _whenOr null
-  let private sortHabitsLeastByRecencyAscending (habits: Habit list) =
+  let private sortHabits (habits: Habit list) =
     habits
     |> List.sortBy (fun h ->
         match h.last_done_at with
@@ -61,16 +55,14 @@ module Views =
             a [_class "button is-text new-habit-button"; _href (Links.add ctx )] [rawText "New Habit"]
           ]
 
-          let sortedHabits = sortHabitsLeastByRecencyAscending habits
-          let stalest = (sortedHabits |> List.filter (fun h -> Option.isSome h.last_done_at) |> List.head).last_done_at.Value
-          let freshest = (List.last sortedHabits).last_done_at.Value
-          let getDot = Dots.forScore stalest freshest
+          let sortedHabits = sortHabits habits
+          let getDot = HealthDots.forHabit sortedHabits
 
-          for habit in (sortHabitsLeastByRecencyAscending habits) do
+          for habit in sortedHabits do
             yield div [_class "card-container overflow-hidden"] [
               yield span [_class "card-title"] [
-                (getDot habit.last_done_at)
-                (rawText habit.name)
+                yield! (if HealthDots.enabled then [getDot habit] else [])
+                yield (rawText habit.name)
               ]
               yield p [] [rawText <| sprintf "Last done: %s" (_whenOrNever habit.last_done_at)]
               yield span [_class "card-links"] [

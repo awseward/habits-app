@@ -18,20 +18,6 @@ type HabitToCreate = {
 
 type CreateOrUpdate = Choice<HabitToCreate, Habit>
 
-module LastDoneScore =
-
-  let getScoringTransform (min: DateTimeOffset) (max: DateTimeOffset) (value: DateTimeOffset) =
-    let minSeconds = min.ToUnixTimeSeconds ()
-    let maxSeconds = max.ToUnixTimeSeconds ()
-    let elapsedSeconds = maxSeconds - minSeconds
-    let multiplier = 99. / (float elapsedSeconds)
-
-    value.ToUnixTimeSeconds ()
-    |> fun sec -> (sec - minSeconds)
-    |> float
-    |> fun secF -> secF * multiplier
-    |> int
-
 module Validation =
   let private _nameNotBlank (name: string) =
     if String.IsNullOrWhiteSpace name then

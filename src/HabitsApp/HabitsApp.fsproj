@@ -10,6 +10,7 @@
     <Compile Include="Templates/Index.fs" />
     <Compile Include="Templates/NotFound.fs" />
     <Compile Include="Templates/InternalError.fs" />
+    <Compile Include="Health.fs" />
     <Compile Include="Habits/HabitsModel.fs" />
     <Compile Include="Habits/HabitsViews.fs" />
     <Compile Include="Habits/HabitsRepository.fs" />
