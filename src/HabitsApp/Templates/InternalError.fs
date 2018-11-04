@@ -13,9 +13,9 @@ let layout isProduction (ex: Exception)  =
         body [] [
            yield h1 [] [rawText "Internal Server Error"]
            if (not isProduction) then
-               yield h3 [] [rawText ex.Message]
-               yield h4 [] [rawText ex.Source]
-               yield p [] [rawText ex.StackTrace]
+               yield h3 [] [rawText <| sprintf "%s: %s" (ex.GetType().Name) ex.Message]
+               yield h4 [] [rawText <| sprintf "from: %s" ex.Source]
+               yield pre [] [rawText ex.StackTrace]
            yield a [_href "/" ] [rawText "Go back to home page"]
         ]
     ]
