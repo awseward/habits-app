@@ -6,13 +6,40 @@ open Saturn
 open System
 
 module Views =
+
+  module HealthDots =
+    let forDateTimeOffset (min: DateTimeOffset) (max: DateTimeOffset) (value: DateTimeOffset option) =
+      let getScore = Health.scoreDateTimeOffset min max
+      let redDot = Health.redToGreenDots |> List.head
+
+      match value with
+      | None -> redDot
+      | Some dtOffset ->
+          dtOffset
+          |> getScore
+          |> fun score -> List.item score Health.redToGreenDots
+
+    let forHabit (sortedHabits: Habit list):  (Habit -> XmlNode) =
+      let freshest = DateTimeOffset.Now
+      let stalest =
+        sortedHabits
+        |> List.map (fun h -> h.last_done_at)
+        |> List.filter Option.isSome
+        |> function
+            | (Some dtOffset)::_ -> dtOffset
+            | _ -> freshest
+
+      (fun h -> forDateTimeOffset stalest freshest h.last_done_at)
+
+    let enabled = true // FIXME: Make this user-configurable
+
   let private _whenOr (defaultValue: string) (value: DateTimeOffset option) =
     match value with
     | Some dto -> (string dto)
     | None -> defaultValue
   let private _whenOrNever = _whenOr "Never"
   let private _whenOrNull = _whenOr null
-  let private sortHabitsLeastByRecencyAscending (habits: Habit list) =
+  let private sortHabits (habits: Habit list) =
     habits
     |> List.sortBy (fun h ->
         match h.last_done_at with
@@ -23,15 +50,21 @@ module Views =
   let index (ctx : HttpContext) (habits : Habit list) =
     App.layout [
       section [_class "section"] [
-        div [_class "container "] [
+        yield div [_class "container "] [
           yield div [_class "overflow-hidden"] [
             a [_class "button is-text new-habit-button"; _href (Links.add ctx )] [rawText "New Habit"]
           ]
 
-          for habit in (sortHabitsLeastByRecencyAscending habits) do
+          let sortedHabits = sortHabits habits
+          let getDot = HealthDots.forHabit sortedHabits
+
+          for habit in sortedHabits do
             yield div [_class "card-container overflow-hidden"] [
-              yield span [_class "card-title"] [rawText habit.name]
-              yield p [] [rawText (_whenOrNever habit.last_done_at)]
+              yield span [_class "card-title"] [
+                yield! (if HealthDots.enabled then [getDot habit] else [])
+                yield (rawText habit.name)
+              ]
+              yield p [] [rawText <| sprintf "Last done: %s" (_whenOrNever habit.last_done_at)]
               yield span [_class "card-links"] [
                 a [_class "button is-text"; _href (Links.withId ctx habit.id )] [rawText "Show"]
                 a [_class "button is-text"; _href (Links.edit ctx habit.id )] [rawText "Edit"]
