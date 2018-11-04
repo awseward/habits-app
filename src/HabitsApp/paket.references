@@ -1,4 +1,5 @@
 FSharp.Core
+dotenv.net
 
 Saturn
 Saturn.Extensions.Authorization

@@ -2,6 +2,7 @@ framework: auto-detect
 source https://api.nuget.org/v3/index.json
 
 nuget Dapper
+nuget dotenv.net
 nuget FSharp.Core
 nuget Giraffe 1.1
 nuget Npgsql

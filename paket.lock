@@ -11,6 +11,8 @@ NUGET
       System.Data.SqlClient (>= 4.4)
       System.Reflection.Emit.Lightweight (>= 4.3)
       System.Reflection.TypeExtensions (>= 4.4)
+    dotenv.net (1.0.4)
+      Microsoft.Extensions.DependencyInjection (>= 2.0)
     dotnet-saturn (0.7.1) - clitool: true
       Argu (>= 4.2.1)
       ConsoleTables (>= 2.2)
