@@ -1,24 +1,24 @@
 
 module OAuthWorkarounds
 
+open FSharp.Control.Tasks.ContextInsensitive
 open Giraffe
 open Microsoft.AspNetCore
 open Microsoft.AspNetCore.Authentication
-open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Authentication.Cookies
+open Microsoft.AspNetCore.Authentication.OAuth
+open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.DependencyInjection
-open Microsoft.AspNetCore.Authentication.OAuth
-open System.Text.Encodings.Web
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.Options
-open System.Threading.Tasks
-open System.Net.Http
-open System.Net.Http.Headers
 open Newtonsoft.Json.Linq
 open Saturn.Application
 open System
-open FSharp.Control.Tasks.ContextInsensitive
+open System.Net.Http
+open System.Net.Http.Headers
+open System.Text.Encodings.Web
+open System.Threading.Tasks
 
 let private _addCookie (state: ApplicationState) (c : AuthenticationBuilder) = if not state.CookiesAlreadyAdded then c.AddCookie () |> ignore
 let private _makeHttpsUnlessLocalhost (url: string) =
