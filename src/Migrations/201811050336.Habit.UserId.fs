@@ -2,7 +2,6 @@ namespace Migrations
 
 open SimpleMigrations
 
-//201811050336.Habit.UserId.fs
 [<Migration(201811050336L, "Add user_id to Habits")>]
 type ``Add user_id to Habits`` () =
   inherit Migration ()

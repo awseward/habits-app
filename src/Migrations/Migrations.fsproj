@@ -9,6 +9,7 @@
     <Compile Include="201810282154.Habit.LastDoneAt.fs" />
     <Compile Include="201811050041.User.fs" />
     <Compile Include="201811050336.Habit.UserId.fs" />
+    <Compile Include="201811050432.User.UniqueOAuthType_OAuthId.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
