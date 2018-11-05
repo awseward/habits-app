@@ -11,12 +11,16 @@
     <Compile Include="Templates/NotFound.fs" />
     <Compile Include="Templates/InternalError.fs" />
     <Compile Include="Health.fs" />
+    <Compile Include="Users/UsersModel.fs" />
+    <Compile Include="Users/UsersRepository.fs" />
     <Compile Include="Habits/HabitsModel.fs" />
     <Compile Include="Habits/HabitsViews.fs" />
     <Compile Include="Habits/HabitsRepository.fs" />
     <Compile Include="Habits/HabitsController.fs" />
     <Compile Include="Envars.fs" />
+    <Compile Include="User.fs" />
     <Compile Include="Router.fs" />
+    <Compile Include="OAuthWorkarounds.fs" />
     <Compile Include="Program.fs" />
     <Content Include="static/*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

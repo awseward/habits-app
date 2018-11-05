@@ -362,6 +362,7 @@ ASALocalRun/
 fake.build.lock
 deploy/
 database.sqlite
+.env
 
 # End custom additions
 

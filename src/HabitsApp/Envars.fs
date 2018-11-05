@@ -7,6 +7,11 @@ module Option =
 
 let tryGet = Environment.GetEnvironmentVariable >> Option.ofString
 
+let get name =
+  name
+  |> tryGet
+  |> Option.defaultWith (fun () -> invalidArg name "Missing required environment variable")
+
 let getEnv () =
   "ENV"
   |> tryGet

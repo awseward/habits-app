@@ -1,9 +1,14 @@
 module Server
 
 open System
+open dotenv.net
 open Saturn
 open Config
 open Habits
+
+DotEnv.Config (
+  throwOnError = false,
+  filePath = "../../.env")
 
 let port =
   try
@@ -31,11 +36,16 @@ let private _connectionString =
     database
 
 let private _isProduction = ("production" = Environment.GetEnvironmentVariable "ENV")
+let private _oauthClientId = Envars.get "GITHUB_OAUTH_CLIENT_ID"
+let private _oauthClientSecret = Envars.get "GITHUB_OAUTH_CLIENT_SECRET"
+
 
 let endpointPipe = pipeline {
     plug head
     plug requestId
 }
+
+open OAuthWorkarounds
 
 let app = application {
     pipe_through endpointPipe
@@ -48,6 +58,7 @@ let app = application {
     use_gzip
     use_config (fun _ -> { connectionString = _connectionString })
     use_turbolinks
+    use_github_oauth_ssl_termination_friendly _oauthClientId _oauthClientSecret "/github_oauth_callback" [("login", "githubUsername"); ("name", "fullName")]
 }
 
 [<EntryPoint>]

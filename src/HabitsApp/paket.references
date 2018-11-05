@@ -1,5 +1,8 @@
 FSharp.Core
+dotenv.net
+
 Saturn
+Saturn.Extensions.Authorization
 Saturn.Extensions.Turbolinks
 
 Dapper
