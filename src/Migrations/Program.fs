@@ -2,10 +2,15 @@ module Program
 
 open System
 open System.Reflection
+open dotenv.net
 open SimpleMigrations
 open SimpleMigrations.DatabaseProvider
 open SimpleMigrations.Console
 open Npgsql
+
+DotEnv.Config (
+  throwOnError = false,
+  filePath = "../../.env")
 
 let private DATABASE_URL = Environment.GetEnvironmentVariable "DATABASE_URL"
 

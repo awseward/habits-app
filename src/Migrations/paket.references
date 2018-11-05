@@ -1,4 +1,6 @@
 FSharp.Core
+dotenv.net
+
 Simple.Migrations
 
 Npgsql
