@@ -4,7 +4,6 @@ open Saturn
 open Giraffe.Core
 open Giraffe.ResponseWriters
 
-
 let browser = pipeline {
     plug acceptHtml
     plug putSecureBrowserHeaders

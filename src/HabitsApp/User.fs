@@ -2,7 +2,48 @@ module User
 
 open Saturn
 open Giraffe
+open Config
 open System.Security.Claims
+
+open Users
+
+let private _getConnectionString ctx =
+    let cnf = Controller.getConfig ctx
+    cnf.connectionString
+
+let ensureUser : HttpHandler = fun next ctx ->
+  // !!!! claims: seq [githubUsername: myCoolHandle; fullName: Firstname Lastname]
+  // !!!! identity.AuthenticationType: "GitHub"
+  let connectionString = _getConnectionString ctx
+  let oauthType = ctx.User.Identity.AuthenticationType
+  if (oauthType <> "GitHub") then invalidArg "Identity.AuthenticationType" "Value not supported"
+  let oauthId =
+    ctx.User.Claims
+    |> Seq.find (fun claim -> claim.Type = "githubUsername")
+    |> fun claim -> claim.Value
+  let tryFindUser () = Users.Repository.getByOAuthInfo connectionString oauthType oauthId
+  let addUserIdToItems (u: User) =
+    ctx.Items.Add ("user_id", u.id)
+    printfn "ctx.Items.[\"user_id\"]: %A" ctx.Items.["user_id"]
+
+  task {
+    let! findExistingResult = tryFindUser ()
+    match findExistingResult with
+    | Ok (Some found) ->
+        addUserIdToItems found
+    | _ ->
+        let! insertNewResult = Users.Repository.insert connectionString { id = 0; oauth_type = oauthType; oauth_id = oauthId }
+        match insertNewResult with
+        | Ok _ ->
+            let! okInsertedResult = tryFindUser ()
+            match okInsertedResult with
+            | Ok (Some inserted) ->
+                addUserIdToItems inserted
+            | _ -> failwith "FIXME: okInsertedResult"
+        | Error exn -> raise exn // FIXME
+
+    return! (next ctx)
+  }
 
 let matchUpUsers : HttpHandler = fun next ctx ->
   let isAdmin =
@@ -19,5 +60,5 @@ let matchUpUsers : HttpHandler = fun next ctx ->
 
 let loggedIn = pipeline {
   requires_authentication (Giraffe.Auth.challenge "GitHub")
-  plug matchUpUsers
+  plug ensureUser
 }
