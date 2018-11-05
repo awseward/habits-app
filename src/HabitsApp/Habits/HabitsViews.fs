@@ -51,7 +51,7 @@ module Views =
     App.layout [
       section [_class "section"] [
         yield div [_class "container "] [
-          yield div [_class "overflow-hidden"] [
+          yield div [_class "overflow-auto"] [
             a [_class "button is-text new-habit-button"; _href (Links.add ctx )] [rawText "New Habit"]
           ]
 
@@ -59,7 +59,7 @@ module Views =
           let getDot = HealthDots.forHabit sortedHabits
 
           for habit in sortedHabits do
-            yield div [_class "card-container overflow-hidden"] [
+            yield div [_class "card-container overflow-auto"] [
               yield span [_class "card-title"] [
                 yield! (if HealthDots.enabled then [getDot habit] else [])
                 yield (rawText habit.name)

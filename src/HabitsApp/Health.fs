@@ -9,7 +9,7 @@ module Health =
     div [_class "dot-container-container"] [
       div [_class "dot-container"] [
         // FIXME: Find a way to apply this other than using inline styles
-        div [_class "dot-outer"; _style (sprintf "background-color: rgba(%d, %d, %d, 0.4)" red green blue)] []
+        div [_class "dot-outer"; _style (sprintf "background-color: rgba(%d, %d, %d, 0.8)" red green blue)] []
       ]
     ]
 
