@@ -20,6 +20,7 @@
     <Compile Include="Envars.fs" />
     <Compile Include="User.fs" />
     <Compile Include="Router.fs" />
+    <Compile Include="OAuthWorkarounds.fs" />
     <Compile Include="Program.fs" />
     <Content Include="static/*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

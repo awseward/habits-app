@@ -45,6 +45,8 @@ let endpointPipe = pipeline {
     plug requestId
 }
 
+open OAuthWorkarounds
+
 let app = application {
     pipe_through endpointPipe
 
@@ -56,7 +58,7 @@ let app = application {
     use_gzip
     use_config (fun _ -> { connectionString = _connectionString })
     use_turbolinks
-    use_github_oauth _oauthClientId _oauthClientSecret "/github_oauth_callback" [("login", "githubUsername"); ("name", "fullName")]
+    use_github_oauth_ssl_termination_friendly _oauthClientId _oauthClientSecret "/github_oauth_callback" [("login", "githubUsername"); ("name", "fullName")]
 }
 
 [<EntryPoint>]

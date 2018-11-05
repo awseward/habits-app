@@ -12,8 +12,6 @@ let private _getConnectionString ctx =
     cnf.connectionString
 
 let ensureUser : HttpHandler = fun next ctx ->
-  // !!!! claims: seq [githubUsername: myCoolHandle; fullName: Firstname Lastname]
-  // !!!! identity.AuthenticationType: "GitHub"
   let connectionString = _getConnectionString ctx
   let oauthType = ctx.User.Identity.AuthenticationType
   if (oauthType <> "GitHub") then invalidArg "Identity.AuthenticationType" "Value not supported"
@@ -24,23 +22,19 @@ let ensureUser : HttpHandler = fun next ctx ->
   let tryFindUser () = Users.Repository.getByOAuthInfo connectionString oauthType oauthId
   let addUserIdToItems (u: User) =
     ctx.Items.Add ("user_id", u.id)
-    printfn "ctx.Items.[\"user_id\"]: %A" ctx.Items.["user_id"]
 
   task {
-    let! findExistingResult = tryFindUser ()
-    match findExistingResult with
-    | Ok (Some found) ->
-        addUserIdToItems found
+    match! tryFindUser () with
+    | Ok (Some found) -> addUserIdToItems found
+    | Error ex -> raise ex
     | _ ->
-        let! insertNewResult = Users.Repository.insert connectionString { id = 0; oauth_type = oauthType; oauth_id = oauthId }
-        match insertNewResult with
+        match! Users.Repository.insert connectionString { id = 0; oauth_type = oauthType; oauth_id = oauthId } with
         | Ok _ ->
-            let! okInsertedResult = tryFindUser ()
-            match okInsertedResult with
-            | Ok (Some inserted) ->
-                addUserIdToItems inserted
-            | _ -> failwith "FIXME: okInsertedResult"
-        | Error exn -> raise exn // FIXME
+            match! tryFindUser () with
+            | Ok (Some inserted) -> addUserIdToItems inserted
+            | Error ex -> raise ex
+            | _ -> failwith "Unable to find just-inserted user."
+        | Error ex -> raise ex
 
     return! (next ctx)
   }

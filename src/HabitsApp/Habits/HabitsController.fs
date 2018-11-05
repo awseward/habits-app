@@ -13,26 +13,26 @@ module Controller =
     task {
       let cnf = Controller.getConfig ctx
       let userId = _getUserId ctx
-      let! result = Database.getAllForUserId cnf.connectionString userId
-      match result with
+
+      match! Database.getAllForUserId cnf.connectionString userId with
       | Ok result ->
-        return Views.index ctx (List.ofSeq result)
+          return Views.index ctx (List.ofSeq result)
       | Error ex ->
-        return raise ex
+          return raise ex
     }
 
   let showAction (ctx: HttpContext) (id : int) =
     task {
       let cnf = Controller.getConfig ctx
       let userId = _getUserId ctx
-      let! result = Database.getByUserIdAndId cnf.connectionString userId id
-      match result with
+
+      match! Database.getByUserIdAndId cnf.connectionString userId id with
       | Ok (Some result) ->
-        return Views.show ctx result
+          return Views.show ctx result
       | Ok None ->
-        return NotFound.layout
+          return NotFound.layout
       | Error ex ->
-        return raise ex
+          return raise ex
     }
 
   let addAction (ctx: HttpContext) =
@@ -46,14 +46,13 @@ module Controller =
     task {
       let cnf = Controller.getConfig ctx
       let userId = _getUserId ctx
-      let! result = Database.getByUserIdAndId cnf.connectionString userId id
-      match result with
+      match! Database.getByUserIdAndId cnf.connectionString userId id with
       | Ok (Some result) ->
-        return Views.edit ctx result Map.empty
+          return Views.edit ctx result Map.empty
       | Ok None ->
-        return NotFound.layout
+          return NotFound.layout
       | Error ex ->
-        return raise ex
+          return raise ex
     }
 
   let createAction (ctx: HttpContext) =
@@ -61,14 +60,12 @@ module Controller =
       let! habitToCreate = Controller.getModel<HabitToCreate> ctx
       let validateResult = Validation.validateCreate habitToCreate
       if validateResult.IsEmpty then
-
         let cnf = Controller.getConfig ctx
-        let! result = Database.insert cnf.connectionString habitToCreate
-        match result with
+        match! Database.insert cnf.connectionString habitToCreate with
         | Ok _ ->
-          return! Controller.redirect ctx (Links.index ctx)
+            return! Controller.redirect ctx (Links.index ctx)
         | Error ex ->
-          return raise ex
+            return raise ex
       else
         return! Controller.renderHtml ctx (Views.add ctx habitToCreate validateResult)
     }
@@ -79,12 +76,11 @@ module Controller =
       let validateResult = Validation.validateUpdate habit
       if validateResult.IsEmpty then
         let cnf = Controller.getConfig ctx
-        let! result = Database.update cnf.connectionString habit
-        match result with
+        match! Database.update cnf.connectionString habit with
         | Ok _ ->
-          return! Controller.redirect ctx (Links.index ctx)
+            return! Controller.redirect ctx (Links.index ctx)
         | Error ex ->
-          return raise ex
+            return raise ex
       else
         return! Controller.renderHtml ctx (Views.edit ctx habit validateResult)
     }
@@ -92,12 +88,11 @@ module Controller =
   let deleteAction (ctx: HttpContext) (id : int) =
     task {
       let cnf = Controller.getConfig ctx
-      let! result = Database.delete cnf.connectionString id
-      match result with
+      match! Database.delete cnf.connectionString id with
       | Ok _ ->
-        return! Controller.redirect ctx (Links.index ctx)
+          return! Controller.redirect ctx (Links.index ctx)
       | Error ex ->
-        return raise ex
+          return raise ex
     }
 
   let resource = controller {

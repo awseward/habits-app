@@ -44,7 +44,7 @@ WHERE user_id = @user_id"
     task {
       use connection = new NpgsqlConnection(connectionString)
       let q = @"
-SELECT id, name, last_done_at
+SELECT id, name, last_done_at, user_id
 FROM Habits
 WHERE
   user_id = @user_id
@@ -58,7 +58,7 @@ WHERE
       let q = @"
 UPDATE Habits SET
   name = @name,
-  last_done_at = @last_done_at,
+  last_done_at = @last_done_at
 WHERE
   user_id = @user_id
   AND id = @id"
