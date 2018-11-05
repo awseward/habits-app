@@ -21,7 +21,7 @@ h1, h2, h3 {
 }
 
 body {
-  font-family: Fira Code, sans-serif;
+  font-family: Fira Code, monospace;
 }
 
 a.button.is-text {
@@ -45,7 +45,7 @@ span.card-links {
 }
 
 div.card-container {
-  background-color: #f0f0f0;
+  background-color: #ddd;
   padding: 10px 20px;
   margin-bottom: 10px;
 }
