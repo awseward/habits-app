@@ -125,6 +125,7 @@ module Views =
         form [ _action formActions; _method "post"] [
           if not validationResult.IsEmpty then
             yield _oopsDiv
+          yield input [_type "hidden"; _name "user_id"; _value (string habit.user_id)]
           yield field (fun i -> (string i.name)) "Name" "name" false []
           yield field (fun i -> (_whenOrNull i.last_done_at)) "Last Done" "last_done_at" true [
             button [_id "set_last_done_now_button"; _type "button"] [rawText "Set as now"]
@@ -158,6 +159,7 @@ module Views =
             yield _oopsDiv
           yield p [] [rawText habit.name]
           yield input [_type "hidden"; _name "id"; _value (string habit.id)]
+          yield input [_type "hidden"; _name "user_id"; _value (string habit.user_id)]
           yield input [_type "hidden"; _name "name"; _value (string habit.name)]
           yield field (fun i -> (_whenOrNull i.last_done_at)) "Last Done" "last_done_at" true [
             button [_id "set_last_done_now_button"; _type "button"] [rawText "Set as now"]

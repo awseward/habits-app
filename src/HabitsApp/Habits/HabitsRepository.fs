@@ -30,33 +30,51 @@ type NullableDateTimeOffsetHandler () =
     |> fun nullable -> parameter.Value <- nullable
 
 module Database =
-  let getAll connectionString : Task<Result<Habit seq, exn>> =
+  let getAllForUserId connectionString userId : Task<Result<Habit seq, exn>> =
     task {
       use connection = new NpgsqlConnection(connectionString)
-      return! query connection "SELECT id, name, last_done_at FROM Habits" None
+      let q = @"
+SELECT id, name, last_done_at, user_id
+FROM Habits
+WHERE user_id = @user_id"
+      return! query connection q (Some <| dict["user_id" => userId])
     }
 
-  let getById connectionString id : Task<Result<Habit option, exn>> =
+  let getByUserIdAndId connectionString userId id : Task<Result<Habit option, exn>> =
     task {
       use connection = new NpgsqlConnection(connectionString)
-      return! querySingle connection "SELECT id, name, last_done_at FROM Habits WHERE id=@id" (Some <| dict ["id" => id])
+      let q = @"
+SELECT id, name, last_done_at
+FROM Habits
+WHERE
+  user_id = @user_id
+  AND id = @id"
+      return! querySingle connection q (Some <| dict ["user_id" => userId; "id" => id])
     }
 
   let update connectionString v : Task<Result<int,exn>> =
     task {
       use connection = new NpgsqlConnection(connectionString)
-      return! execute connection "UPDATE Habits SET id = @id, name = @name, last_done_at = @last_done_at WHERE id=@id" v
+      let q = @"
+UPDATE Habits SET
+  name = @name,
+  last_done_at = @last_done_at,
+WHERE
+  user_id = @user_id
+  AND id = @id"
+      return! execute connection q v
     }
 
   let insert connectionString v : Task<Result<int,exn>> =
     task {
       use connection = new NpgsqlConnection(connectionString)
-      let query = "INSERT INTO Habits(name, last_done_at) VALUES (@name, @last_done_at)"
-      return! execute connection query v
+      let q = "INSERT INTO Habits (name, last_done_at, user_id) VALUES (@name, @last_done_at, @user_id)"
+      return! execute connection q v
     }
 
   let delete connectionString id : Task<Result<int,exn>> =
     task {
       use connection = new NpgsqlConnection(connectionString)
-      return! execute connection "DELETE FROM Habits WHERE id=@id" (dict ["id" => id])
+      let q = "DELETE FROM Habits WHERE id = @id"
+      return! execute connection q (dict ["id" => id])
     }

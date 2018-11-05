@@ -6,11 +6,14 @@ open Config
 open Saturn
 
 module Controller =
+  let private _getUserId (ctx: HttpContext) =
+    ctx.Items.["user_id"] :?> int
 
   let indexAction (ctx : HttpContext) =
     task {
       let cnf = Controller.getConfig ctx
-      let! result = Database.getAll cnf.connectionString
+      let userId = _getUserId ctx
+      let! result = Database.getAllForUserId cnf.connectionString userId
       match result with
       | Ok result ->
         return Views.index ctx (List.ofSeq result)
@@ -21,7 +24,8 @@ module Controller =
   let showAction (ctx: HttpContext) (id : int) =
     task {
       let cnf = Controller.getConfig ctx
-      let! result = Database.getById cnf.connectionString id
+      let userId = _getUserId ctx
+      let! result = Database.getByUserIdAndId cnf.connectionString userId id
       match result with
       | Ok (Some result) ->
         return Views.show ctx result
@@ -33,13 +37,16 @@ module Controller =
 
   let addAction (ctx: HttpContext) =
     task {
-      return Views.add ctx (HabitToCreate.GetEmpty()) Map.empty
+      let userId = _getUserId ctx
+
+      return Views.add ctx (HabitToCreate.GetEmpty userId) Map.empty
     }
 
   let editAction (ctx: HttpContext) (id : int) =
     task {
       let cnf = Controller.getConfig ctx
-      let! result = Database.getById cnf.connectionString id
+      let userId = _getUserId ctx
+      let! result = Database.getByUserIdAndId cnf.connectionString userId id
       match result with
       | Ok (Some result) ->
         return Views.edit ctx result Map.empty

@@ -7,14 +7,16 @@ type Habit = {
   id: int
   name: string
   last_done_at: DateTimeOffset option
+  user_id: int
 }
 
 [<CLIMutable>]
 type HabitToCreate = {
   name: string
   last_done_at: DateTimeOffset option
+  user_id: int
 }
-  with static member GetEmpty () = { name = ""; last_done_at = None}
+  with static member GetEmpty userId = { name = ""; last_done_at = None; user_id = userId}
 
 type CreateOrUpdate = Choice<HabitToCreate, Habit>
 
