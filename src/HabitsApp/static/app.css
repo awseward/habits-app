@@ -69,9 +69,6 @@ div.card-container p {
 
 html[data-turbolinks-preview] body * {
   opacity: 0.8;
-
-  text-shadow: rgba(255, 0, 0, 0.6) -2px -2px 5px, #69face 2px 2px 5px;
-  color: rgba(0, 0, 0, 0.02);
 }
 
 .turbolinks-progress-bar {
