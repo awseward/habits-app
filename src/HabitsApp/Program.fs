@@ -6,7 +6,9 @@ open Saturn
 open Config
 open Habits
 
-DotEnv.Config (filePath = "../../.env")
+DotEnv.Config (
+  throwOnError = false,
+  filePath = "../../.env")
 
 let port =
   try
