@@ -22,20 +22,6 @@ module Controller =
           return raise ex
     }
 
-  let showAction (ctx: HttpContext) (id : int) =
-    task {
-      let cnf = Controller.getConfig ctx
-      let userId = _getUserId ctx
-
-      match! Database.getByUserIdAndId cnf.connectionString userId id with
-      | Ok (Some result) ->
-          return Views.show ctx result
-      | Ok None ->
-          return NotFound.layout
-      | Error ex ->
-          return raise ex
-    }
-
   let addAction (ctx: HttpContext) =
     task {
       let userId = _getUserId ctx
@@ -43,54 +29,59 @@ module Controller =
       return Views.add ctx (HabitToCreate.GetEmpty userId) Map.empty
     }
 
-  let editAction (ctx: HttpContext) (id : int) =
-    task {
-      let cnf = Controller.getConfig ctx
+  let createAction (ctx: HttpContext) =
+    let getModel () = task {
+      let! boundModel = Controller.getModel<HabitToCreate> ctx
       let userId = _getUserId ctx
-      match! Database.getByUserIdAndId cnf.connectionString userId id with
-      | Ok (Some result) ->
-          return Views.edit ctx result Map.empty
-      | Ok None ->
-          return NotFound.layout
-      | Error ex ->
-          return raise ex
+      return { boundModel with user_id = userId }
     }
 
-  let createAction (ctx: HttpContext) =
     task {
-      let! habitToCreate = Controller.getModel<HabitToCreate> ctx
-      let validateResult = Validation.validateCreate habitToCreate
+      let! model = getModel ()
+      let validateResult = Validation.validateCreate model
       if validateResult.IsEmpty then
         let cnf = Controller.getConfig ctx
-        match! Database.insert cnf.connectionString habitToCreate with
+        match! Database.insert cnf.connectionString model with
         | Ok _ ->
             return! Controller.redirect ctx (Links.index ctx)
         | Error ex ->
             return raise ex
       else
-        return! Controller.renderHtml ctx (Views.add ctx habitToCreate validateResult)
+        return! Controller.renderHtml ctx (Views.add ctx model validateResult)
     }
 
   let updateAction (ctx: HttpContext) (id : int) =
-    task {
+    let getModel () = task {
       let! boundModel = Controller.getModel<Habit> ctx
-      let habit = { boundModel with last_done_at = (Some DateTimeOffset.Now) }
-      let validateResult = Validation.validateUpdate habit
+      let userId = _getUserId ctx
+
+      return
+        { boundModel with
+            id = id
+            last_done_at = Some DateTimeOffset.Now
+            user_id = userId }
+    }
+
+    task {
+      let cnf = Controller.getConfig ctx
+      let! model = getModel ()
+      let validateResult = Validation.validateUpdate model
       if validateResult.IsEmpty then
-        let cnf = Controller.getConfig ctx
-        match! Database.update cnf.connectionString habit with
+        match! Database.update cnf.connectionString model with
         | Ok _ ->
             return! Controller.redirect ctx (Links.index ctx)
         | Error ex ->
             return raise ex
       else
-        return! Controller.renderHtml ctx (Views.edit ctx habit validateResult)
+        // TODO: Maybe render with some kind of indication of validation errors...
+        return! Controller.redirect ctx (Links.index ctx)
     }
 
   let deleteAction (ctx: HttpContext) (id : int) =
     task {
       let cnf = Controller.getConfig ctx
-      match! Database.delete cnf.connectionString id with
+      let userId = _getUserId ctx
+      match! Database.delete cnf.connectionString userId id with
       | Ok _ ->
           return! Controller.redirect ctx (Links.index ctx)
       | Error ex ->
@@ -99,9 +90,7 @@ module Controller =
 
   let resource = controller {
     index indexAction
-    show showAction
     add addAction
-    edit editAction
     create createAction
     update updateAction
     delete deleteAction

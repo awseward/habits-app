@@ -24,8 +24,10 @@ body {
   font-family: Fira Code, monospace;
 }
 
-a.button.is-text {
+span.card-title a.is-delete {
   padding: 2px;
+  float: right;
+  font-size: 12px;
 }
 
 input.input {
