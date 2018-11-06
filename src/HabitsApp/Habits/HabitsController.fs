@@ -4,6 +4,7 @@ open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks.ContextInsensitive
 open Config
 open Saturn
+open System
 
 module Controller =
   let private _getUserId (ctx: HttpContext) =
@@ -72,7 +73,8 @@ module Controller =
 
   let updateAction (ctx: HttpContext) (id : int) =
     task {
-      let! habit = Controller.getModel<Habit> ctx
+      let! boundModel = Controller.getModel<Habit> ctx
+      let habit = { boundModel with last_done_at = (Some DateTimeOffset.Now) }
       let validateResult = Validation.validateUpdate habit
       if validateResult.IsEmpty then
         let cnf = Controller.getConfig ctx
