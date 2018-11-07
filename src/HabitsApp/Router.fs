@@ -3,25 +3,8 @@ module Router
 open Saturn
 open Giraffe.Core
 open Giraffe.ResponseWriters
+open HabitsApp.HttpHandlers
 open System
-
-type PipelineBuilder with
-  [<CustomOperation("require_https")>]
-  member __.RequireHttps (state, isRequired: bool) : HttpHandler =
-    if isRequired then
-      state
-        >=> setHttpHeader "Strict-Transport-Security" "max-age=31536000; includeSubDomains"
-        >=> fun next ctx ->
-          let headerValues = ctx.Request.Headers.["X-Forwarded-Proto"]
-          if headerValues.Count > 0 && headerValues.[0] = "http" then
-            let path = if ctx.Request.Path.HasValue then ctx.Request.Path.Value else ""
-            let builder = new System.UriBuilder ("https", ctx.Request.Host.Value, -1, path)
-            let redirectUri = builder.Uri.GetComponents (UriComponents.Scheme ||| UriComponents.Host ||| UriComponents.PathAndQuery, UriFormat.SafeUnescaped)
-
-            redirectTo true redirectUri next ctx
-          else
-            next ctx
-    else state >=> fun next ctx -> next ctx
 
 let browser = pipeline {
     require_https true
@@ -33,9 +16,12 @@ let browser = pipeline {
 }
 
 let defaultView = router {
-    get "/" (htmlView Index.layout)
-    get "/index.html" (redirectTo false "/")
-    get "/default.html" (redirectTo false "/")
+    get "/" (
+      choose [
+        userIsAuthenticated >=> redirectTo false "/habits"
+        htmlView Index.layout
+      ]
+    )
     get "/github_oauth_callback" (redirectTo false "/habits")
 }
 

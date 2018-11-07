@@ -8,8 +8,8 @@ open System.Security.Claims
 open Users
 
 let private _getConnectionString ctx =
-    let cnf = Controller.getConfig ctx
-    cnf.connectionString
+  let cnf = Controller.getConfig ctx
+  cnf.connectionString
 
 let ensureUser : HttpHandler = fun next ctx ->
   let connectionString = _getConnectionString ctx
