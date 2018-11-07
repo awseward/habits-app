@@ -10,7 +10,7 @@ type PipelineBuilder with
   member __.RequireHttps (state, isRequired: bool) : HttpHandler =
     if isRequired then
       state
-        >=> setHttpHeader "Strict-Transport-Security" "max-age=86400; includeSubDomains"
+        >=> setHttpHeader "Strict-Transport-Security" "max-age=31536000; includeSubDomains"
         >=> fun next ctx ->
           let headerValues = ctx.Request.Headers.["X-Forwarded-Proto"]
           if headerValues.Count > 0 && headerValues.[0] = "http" then

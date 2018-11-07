@@ -72,9 +72,9 @@ WHERE
       return! execute connection q v
     }
 
-  let delete connectionString id : Task<Result<int,exn>> =
+  let delete connectionString userId id : Task<Result<int,exn>> =
     task {
       use connection = new NpgsqlConnection(connectionString)
-      let q = "DELETE FROM Habits WHERE id = @id"
-      return! execute connection q (dict ["id" => id])
+      let q = "DELETE FROM Habits WHERE user_id = @user_id AND id = @id"
+      return! execute connection q (dict ["user_id" => userId; "id" => id])
     }

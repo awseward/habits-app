@@ -11,12 +11,21 @@ module Views =
     let forDateTimeOffset (min: DateTimeOffset) (max: DateTimeOffset) (value: DateTimeOffset option) =
       let getScore = Health.scoreDateTimeOffset min max
       let redDot = Health.redToGreenDots |> List.head
+      let guardRailsBandaid score =
+        score
+        |> fun s -> Math.Max (s, 0)
+        |> fun s -> Math.Min (s, Health.redToGreenDots.Length)
+        |> fun s ->
+            if s <> score then
+              eprintfn "WARNING: guard rails required for sloppy score calculation to prevent IndexOutOfBoundsException"
+            s
 
       match value with
       | None -> redDot
       | Some dtOffset ->
           dtOffset
           |> getScore
+          |> guardRailsBandaid
           |> fun score -> List.item score Health.redToGreenDots
 
     let forHabit (sortedHabits: Habit list):  (Habit -> XmlNode) =
@@ -39,7 +48,7 @@ module Views =
     | None -> defaultValue
   let private _whenOrNever = _whenOr "Never"
   let private _whenOrNull = _whenOr null
-  let private sortHabits (habits: Habit list) =
+  let private _sortHabits (habits: Habit list) =
     habits
     |> List.sortBy (fun h ->
         match h.last_done_at with
@@ -55,7 +64,7 @@ module Views =
             a [_class "button is-text new-habit-button"; _href (Links.add ctx )] [rawText "New Habit"]
           ]
 
-          let sortedHabits = sortHabits habits
+          let sortedHabits = _sortHabits habits
           let getDot = HealthDots.forHabit sortedHabits
 
           for habit in sortedHabits do
@@ -63,30 +72,19 @@ module Views =
               yield span [_class "card-title"] [
                 yield! (if HealthDots.enabled then [getDot habit] else [])
                 yield (rawText habit.name)
+                yield a [_class "button is-delete"; attr "data-href" (Links.withId ctx habit.id); _href ""] [rawText "Delete"]
               ]
               yield p [] [rawText <| sprintf "Last done: %s" (_whenOrNever habit.last_done_at)]
               yield span [_class "card-links"] [
-                a [_class "button is-text"; _href (Links.withId ctx habit.id )] [rawText "Show"]
-                a [_class "button is-text"; _href (Links.edit ctx habit.id )] [rawText "Edit"]
-                a [_class "button is-text is-delete"; attr "data-href" (Links.withId ctx habit.id ) ] [rawText "Delete"]
+                form [_action (Links.withId ctx habit.id); _method "post"] [
+                  input [_type "hidden"; _name "name"; _value habit.name]
+                  button [_type "submit"; _class "button is-link"] [rawText "Now"]
+                ]
               ]
             ]
         ]
       ]
     ]
-
-  let show (ctx : HttpContext) (o : Habit) =
-    let cnt = [
-      div [_class "container "] [
-        ul [] [
-          li [] [ strong [] [rawText "Name: "]; rawText (string o.name) ]
-          li [] [ strong [] [rawText "Last Done: "]; rawText (_whenOrNever o.last_done_at) ]
-        ]
-        a [_class "button is-text"; _href (Links.edit ctx o.id)] [rawText "Edit"]
-        a [_class "button is-text"; _href (Links.index ctx )] [rawText "Back"]
-      ]
-    ]
-    App.layout ([section [_class "section"] cnt])
 
   let private _oopsDiv =
     div [_class "notification is-danger"] [
@@ -104,7 +102,7 @@ module Views =
       ]
     ]
 
-  let private createForm (ctx: HttpContext) (habit: HabitToCreate) (validationResult: Map<string, string>) =
+  let private _createForm (ctx: HttpContext) (habit: HabitToCreate) (validationResult: Map<string, string>) =
     let field selector lbl key inputReadOnly (moreStuff: XmlNode list) =
       div [_class "field"] [
         yield label [_class "label"] [rawText (string lbl)]
@@ -125,44 +123,9 @@ module Views =
         form [ _action formActions; _method "post"] [
           if not validationResult.IsEmpty then
             yield _oopsDiv
-          yield input [_type "hidden"; _name "user_id"; _value (string habit.user_id)]
           yield field (fun i -> (string i.name)) "Name" "name" false []
           yield field (fun i -> (_whenOrNull i.last_done_at)) "Last Done" "last_done_at" true [
-            button [_id "set_last_done_now_button"; _type "button"] [rawText "Set as now"]
-          ]
-          yield _buttons ctx
-        ]
-      ]
-    ]
-    App.layout ([section [_class "section"] cnt])
-
-  let private editForm (ctx: HttpContext) (habit: Habit) (validationResult: Map<string, string>) =
-    let field selector lbl key inputReadOnly (moreStuff: XmlNode list) =
-      div [_class "field"] [
-        yield label [_class "label"] [rawText (string lbl)]
-        yield div [_class "control has-icons-right"] [
-          yield input [_class (if validationResult.ContainsKey key then "input is-danger" else "input"); _value (selector habit); _name key ; _type "text"; (if inputReadOnly then _readonly else attr "" "")]
-          yield span [] moreStuff
-          if validationResult.ContainsKey key then
-            yield span [_class "icon is-small is-right"] [
-              i [_class "fas fa-exclamation-triangle"] []
-            ]
-        ]
-        if validationResult.ContainsKey key then
-          yield p [_class "help is-danger"] [rawText validationResult.[key]]
-      ]
-    let formActions = Links.withId ctx habit.id
-    let cnt = [
-      div [_class "container "] [
-        form [ _action formActions; _method "post"] [
-          if not validationResult.IsEmpty then
-            yield _oopsDiv
-          yield p [] [rawText habit.name]
-          yield input [_type "hidden"; _name "id"; _value (string habit.id)]
-          yield input [_type "hidden"; _name "user_id"; _value (string habit.user_id)]
-          yield input [_type "hidden"; _name "name"; _value (string habit.name)]
-          yield field (fun i -> (_whenOrNull i.last_done_at)) "Last Done" "last_done_at" true [
-            button [_id "set_last_done_now_button"; _type "button"] [rawText "Set as now"]
+            button [_id "set_last_done_now_button"; _type "button"] [rawText "Now"]
           ]
           yield _buttons ctx
         ]
@@ -171,7 +134,4 @@ module Views =
     App.layout ([section [_class "section"] cnt])
 
   let add (ctx: HttpContext) (habit: HabitToCreate) (validationResult: Map<string, string>) =
-    createForm ctx habit validationResult
-
-  let edit (ctx: HttpContext) (habit: Habit) (validationResult : Map<string, string>) =
-    editForm ctx habit validationResult
+    _createForm ctx habit validationResult
