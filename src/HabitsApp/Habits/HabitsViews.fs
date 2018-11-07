@@ -5,6 +5,12 @@ open Giraffe.GiraffeViewEngine
 open Saturn
 open System
 
+module Temp =
+  let userIsAuthenticated (ctx: HttpContext) =
+    ctx.User |> (not << isNull)
+    && ctx.User.Identity |> (not << isNull)
+    && ctx.User.Identity.IsAuthenticated
+
 module Views =
 
   module HealthDots =
@@ -57,7 +63,7 @@ module Views =
     )
 
   let index (ctx : HttpContext) (habits : Habit list) =
-    App.layout [
+    App.layout (Temp.userIsAuthenticated ctx) [
       section [_class "section"] [
         yield div [_class "container "] [
           yield div [_class "overflow-auto"] [
@@ -131,7 +137,7 @@ module Views =
         ]
       ]
     ]
-    App.layout ([section [_class "section"] cnt])
+    App.layout (Temp.userIsAuthenticated ctx) ([section [_class "section"] cnt])
 
   let add (ctx: HttpContext) (habit: HabitToCreate) (validationResult: Map<string, string>) =
     _createForm ctx habit validationResult

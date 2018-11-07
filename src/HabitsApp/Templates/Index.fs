@@ -4,8 +4,8 @@ open Giraffe.GiraffeViewEngine
 
 let index =
   [
-    a [_href "/habits"] [rawText "Do it."]
+    a [_href "/habits"; attr "data-turbolinks" "false"] [rawText "Let's go."]
   ]
 
 let layout =
-  App.layout index
+  App.layout false index

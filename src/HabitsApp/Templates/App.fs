@@ -2,7 +2,7 @@ module App
 
 open Giraffe.GiraffeViewEngine
 
-let layout (content: XmlNode list) =
+let layout isAuthenticated (content: XmlNode list) =
     html [_class "has-navbar-fixed-top"] [
         head [] [
             meta [_charset "utf-8"]
@@ -14,6 +14,8 @@ let layout (content: XmlNode list) =
         ]
 
         body [] [
+            if isAuthenticated then
+              yield a [_href "/logout"; _class "logout-link"] [rawText "Log out"]
             yield h1 [] [rawText "Habits"]
             yield! content
         ]

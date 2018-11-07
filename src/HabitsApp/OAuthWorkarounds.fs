@@ -102,6 +102,8 @@ type ApplicationBuilder with
         opt.AuthorizationEndpoint <-  "https://github.com/login/oauth/authorize"
         opt.TokenEndpoint <- "https://github.com/login/oauth/access_token"
         opt.UserInformationEndpoint <- "https://api.github.com/user"
+        opt.SaveTokens <- true
+
         jsonToClaimMap |> Seq.iter (fun (k,v) -> opt.ClaimActions.MapJsonKey(v,k) )
         let ev = opt.Events
 
