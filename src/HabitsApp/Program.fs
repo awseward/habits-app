@@ -37,16 +37,16 @@ let private _connectionString =
     database
 
 let private _isProduction = ("production" = Environment.GetEnvironmentVariable "ENV")
-let private _oauthClientId = Envars.get "GITHUB_OAUTH_CLIENT_ID"
-let private _oauthClientSecret = Envars.get "GITHUB_OAUTH_CLIENT_SECRET"
-
 
 let endpointPipe = pipeline {
     plug head
     plug requestId
 }
 
-open OAuthWorkarounds
+open HabitsApp.OidcStuff
+let clientId = Envars.get "GOOGLE_CLIENT_ID"
+let clientSecret = Envars.get "GOOGLE_CLIENT_SECRET"
+let authority = "https://accounts.google.com/"
 
 let app = application {
     pipe_through endpointPipe
@@ -59,7 +59,8 @@ let app = application {
     use_gzip
     use_config (fun _ -> { connectionString = _connectionString })
     use_turbolinks
-    use_github_oauth_ssl_termination_friendly _oauthClientId _oauthClientSecret "/github_oauth_callback" [("login", "githubUsername"); ("name", "fullName")]
+
+    use_oidc clientId clientSecret authority
 }
 
 [<EntryPoint>]

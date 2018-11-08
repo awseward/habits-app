@@ -20,13 +20,10 @@
     <Compile Include="Habits/HabitsController.fs" />
     <Compile Include="Envars.fs" />
     <Compile Include="HttpHandlers.fs" />
+    <Compile Include="OidcStuff.fs" />
     <Compile Include="Router.fs" />
-    <Compile Include="OAuthWorkarounds.fs" />
     <Compile Include="Program.fs" />
     <Content Include="static/*.*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="*.sqlite">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
