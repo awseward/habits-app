@@ -21,7 +21,6 @@ let loggedIn = pipeline {
 }
 
 open Microsoft.AspNetCore.Authentication
-open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks.ContextInsensitive
 open System.Net.Http
 
@@ -55,11 +54,13 @@ let revokeGithubToken : HttpHandler = fun next ctx ->
     return! next ctx
   }
 
-let clearCookies : HttpHandler = fun next ctx ->
-  for cookieKey in ctx.Request.Cookies.Keys do
-    ctx.Response.Cookies.Delete cookieKey
+open Microsoft.AspNetCore.Authentication
 
-  next ctx
+let clearCookies : HttpHandler = fun next ctx ->
+  task {
+    let! _ = ctx.SignOutAsync ()
+    return! next ctx
+  }
 
 let redirectToRoot : HttpHandler = redirectTo false "/"
 
