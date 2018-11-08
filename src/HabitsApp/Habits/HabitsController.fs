@@ -7,8 +7,7 @@ open Saturn
 open System
 
 module Controller =
-  let private _getUserId (ctx: HttpContext) =
-    ctx.Items.["user_id"] :?> int
+  let private _getUserId = Users.Service.getCurrentUserId
 
   let indexAction (ctx : HttpContext) =
     task {

@@ -20,6 +20,16 @@ function setLastDoneAsNow() {
   document.getElementsByName('last_done_at')[0].value = new Date().toISOString();
 }
 
+function clearTurbolinksCacheOnLogoutClick() {
+  var anchors = document.getElementsByClassName('logout-link');
+  for (var i = 0; i < anchors.length; i++) {
+    var anchor = anchors[i];
+    anchor.addEventListener('click', function () {
+      Turbolinks.clearCache();
+    });
+  }
+}
+
 function addOnclickToSetLastDoneAsNowButtonIfPresent() {
   var button = document.getElementById('set_last_done_now_button');
   if (button !== null) {
@@ -30,6 +40,7 @@ function addOnclickToSetLastDoneAsNowButtonIfPresent() {
 function setUpThePage() {
   addDeleteButtons();
   addOnclickToSetLastDoneAsNowButtonIfPresent();
+  clearTurbolinksCacheOnLogoutClick();
 }
 
 document.addEventListener('DOMContentLoaded', setUpThePage);
