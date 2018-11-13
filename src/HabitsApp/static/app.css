@@ -24,6 +24,14 @@ body {
   font-family: Fira Code, monospace;
 }
 
+a {
+  color: #3F51B5;
+}
+
+a:hover {
+  color: #009688;
+}
+
 span.card-title a.is-delete {
   padding: 2px;
   float: right;
@@ -54,6 +62,10 @@ div.card-container {
 
 div.card-container:hover {
   background-color: #e4e4e4;
+  position: relative;
+  top: -3px;
+  left: -2px;
+  box-shadow: #666 2px 3px 5px;
 }
 
 .overflow-auto {
@@ -106,6 +118,13 @@ html[data-turbolinks-preview] body * {
 }
 
 .card-links button.is-link {
-  padding: 8px 16px;
-  font-size: 16px;
+  padding: 6px 24px;
+  font-size: 14px;
+  background: none;
+  background-color: #eee;
+  cursor: pointer;
+}
+
+.card-links button.is-link:hover {
+  background-color: #ddd;
 }
