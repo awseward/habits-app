@@ -46,7 +46,7 @@ module Views =
 
       (fun h -> forDateTimeOffset stalest freshest h.last_done_at)
 
-    let enabled = true // FIXME: Make this user-configurable
+    let enabled = false // FIXME: Make this user-configurable
 
   let private _whenOr (defaultValue: string) (value: DateTimeOffset option) =
     match value with

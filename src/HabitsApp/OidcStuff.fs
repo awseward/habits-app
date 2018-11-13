@@ -40,6 +40,9 @@ module OidcStuff =
       builder.Services.TryAddEnumerable (ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, OpenIdConnectPostConfigureOptions>())
       builder.AddRemoteScheme<OpenIdConnectOptions, SslTerminationFriendlyOidcHandler> (OpenIdConnectDefaults.AuthenticationScheme, OpenIdConnectDefaults.DisplayName, new Action<OpenIdConnectOptions>(configureOptions))
 
+    member builder.EnsureCookieAdded (state: ApplicationState) =
+      if not state.CookiesAlreadyAdded then builder.AddCookie() else builder
+
   type ApplicationBuilder with
     [<CustomOperation("use_oidc")>]
     member __.UseOidc (state: ApplicationState, clientId: string, clientSecret: string, authority: string) =
@@ -54,7 +57,7 @@ module OidcStuff =
               options.DefaultSignInScheme <- CookieAuthenticationDefaults.AuthenticationScheme
               options.DefaultChallengeScheme <- OpenIdConnectDefaults.AuthenticationScheme
           )
-          .AddCookie()
+          .EnsureCookieAdded(state)
           .AddOpenIdConnect_SslTerminationFriendly (fun options ->
             options.ClientId <- clientId
             options.ClientSecret <- clientSecret
@@ -84,5 +87,5 @@ module OidcStuff =
       { state with
           ServicesConfig = serviceConfig::state.ServicesConfig
           AppConfigs = appConfig::state.AppConfigs
-          ApplicationState.CookiesAlreadyAdded = false // Maybe, maybe not
+          CookiesAlreadyAdded = true
       }
