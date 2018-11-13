@@ -14,8 +14,8 @@ let layout isAuthenticated (content: XmlNode list) =
         ]
 
         body [] [
-            // if isAuthenticated then
-            //   yield a [_href "/logout"; _class "logout-link"; attr "data-turbolinks" "false"] [rawText "Log out"]
+            if isAuthenticated then
+              yield a [_href "/logout"; _class "logout-link"; attr "data-turbolinks" "false"] [rawText "Log out"]
             yield h1 [] [rawText "Habits"]
             yield! content
         ]

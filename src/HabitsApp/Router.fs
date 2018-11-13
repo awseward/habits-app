@@ -14,8 +14,10 @@ let browser = pipeline {
     set_header "x-pipeline-type" "Browser"
 }
 
+open Microsoft.AspNetCore.Authentication.OpenIdConnect
+
 let loggedIn = pipeline {
-  requires_authentication (Giraffe.Auth.challenge "GitHub")
+  requires_authentication (Giraffe.Auth.challenge OpenIdConnectDefaults.AuthenticationScheme)
 
   plug ensureUserPersisted
 }
@@ -29,44 +31,11 @@ let private _client =
   client.DefaultRequestHeaders.Add ("User-Agent", "FIXME")
   client
 
-let private _oauthClientId = Envars.get "GITHUB_OAUTH_CLIENT_ID"
-let private _oauthClientSecret = Envars.get "GITHUB_OAUTH_CLIENT_SECRET"
-
-let private _getBasicAuthHeaderValue () =
-  _oauthClientSecret
-  |> sprintf "%s:%s" _oauthClientId
-  |> System.Text.ASCIIEncoding.ASCII.GetBytes
-  |> Convert.ToBase64String
-  |> sprintf "Basic %s"
-
-let private _getAccessTokenRevokeUri =
-  Uri << sprintf "https://api.github.com/applications/%s/tokens/%s" _oauthClientId
-
-let revokeGithubToken : HttpHandler = fun next ctx ->
-  task {
-    let! token = ctx.GetTokenAsync "access_token"
-    let uri = _getAccessTokenRevokeUri token
-    let req = new HttpRequestMessage (HttpMethod.Delete, uri)
-    req.Headers.Add ("Authorization", _getBasicAuthHeaderValue())
-    use! response = _client.SendAsync (req, HttpCompletionOption.ResponseHeadersRead, ctx.RequestAborted)
-    // response.EnsureSuccessStatusCode () |> ignore
-
-    return! next ctx
-  }
-
-open Microsoft.AspNetCore.Authentication
-
-let clearCookies : HttpHandler = fun next ctx ->
-  task {
-    let! _ = ctx.SignOutAsync ()
-    return! next ctx
-  }
-
 let redirectToRoot : HttpHandler = redirectTo false "/"
 
 let logOutView = router {
   get "" (choose [
-            userIsAuthenticated >=> revokeGithubToken >=> clearCookies >=> redirectToRoot
+            userIsAuthenticated >=> HabitsApp.OidcStuff.signOut >=> redirectToRoot
             redirectToRoot
           ])
 }
@@ -76,7 +45,6 @@ let defaultView = router {
                 userIsAuthenticated >=> redirectTo false "/habits"
                 htmlView Index.layout
               ])
-    get "/github_oauth_callback" (redirectTo false "/habits")
 }
 
 let habitsView = router {

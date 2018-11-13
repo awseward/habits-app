@@ -43,16 +43,16 @@ module HttpHandlers =
     let config = Saturn.ControllerHelpers.Controller.getConfig ctx
     config.connectionString
 
-
+  // FIXME: This is probably doing all kinds of wrong things
   let ensureUserPersisted : HttpHandler = fun next ctx ->
     let connectionString = _getConnectionString ctx
-    let oauthType = ctx.User.Identity.AuthenticationType
-    if (oauthType <> "GitHub") then invalidArg "Identity.AuthenticationType" "Value not supported"
+    let authType = ctx.User.Identity.AuthenticationType
+    if (authType <> "AuthenticationTypes.Federation") then invalidArg "Identity.AuthenticationType" (sprintf "Value '%s' not supported" authType)
     let oauthId =
       ctx.User.Claims
-      |> Seq.find (fun claim -> claim.Type = "githubUsername")
+      |> Seq.find (fun claim -> claim.Type = "sub")
       |> fun claim -> claim.Value
-    let tryFindUser () = Users.Repository.getByOAuthInfo connectionString oauthType oauthId
+    let tryFindUser () = Users.Repository.getByOAuthInfo connectionString authType oauthId
     let addUserIdToItems (u: Users.User) = Users.Service.setCurrentUserid ctx u.id
 
     task {
@@ -60,7 +60,7 @@ module HttpHandlers =
       | Ok (Some found) -> addUserIdToItems found
       | Error ex -> raise ex
       | _ ->
-          match! Users.Repository.insert connectionString { id = 0; oauth_type = oauthType; oauth_id = oauthId } with
+          match! Users.Repository.insert connectionString { id = 0; oauth_type = authType; oauth_id = oauthId } with
           | Ok _ ->
               match! tryFindUser () with
               | Ok (Some inserted) -> addUserIdToItems inserted
