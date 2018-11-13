@@ -104,3 +104,8 @@ html[data-turbolinks-preview] body * {
   font-size: 12px;
   float: right;
 }
+
+.card-links button.is-link {
+  padding: 8px 16px;
+  font-size: 16px;
+}
