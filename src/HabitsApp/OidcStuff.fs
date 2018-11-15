@@ -41,7 +41,16 @@ module OidcStuff =
       builder.AddRemoteScheme<OpenIdConnectOptions, SslTerminationFriendlyOidcHandler> (OpenIdConnectDefaults.AuthenticationScheme, OpenIdConnectDefaults.DisplayName, new Action<OpenIdConnectOptions>(configureOptions))
 
     member builder.EnsureCookieAdded (state: ApplicationState) =
-      if not state.CookiesAlreadyAdded then builder.AddCookie() else builder
+      if not state.CookiesAlreadyAdded then
+        builder.AddCookie(
+          // Workaround for webkit behavior in iOS12
+          // See also:
+          // - https://bugs.webkit.org/show_bug.cgi?id=188165
+          // - https://github.com/IdentityServer/IdentityServer4/issues/2595
+          // - https://hajekj.net/2018/08/31/beware-of-samesite-cookie-policy-in-asp-net-core-and-upcoming-ios-12/
+          fun options -> options.Cookie.SameSite <- SameSiteMode.None
+        )
+      else builder
 
   type ApplicationBuilder with
     [<CustomOperation("use_oidc")>]

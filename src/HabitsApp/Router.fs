@@ -22,14 +22,7 @@ let loggedIn = pipeline {
   plug ensureUserPersisted
 }
 
-open Microsoft.AspNetCore.Authentication
-open FSharp.Control.Tasks.ContextInsensitive
 open System.Net.Http
-
-let private _client =
-  let client = new HttpClient ()
-  client.DefaultRequestHeaders.Add ("User-Agent", "FIXME")
-  client
 
 let redirectToRoot : HttpHandler = redirectTo false "/"
 
